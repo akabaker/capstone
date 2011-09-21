@@ -4,15 +4,34 @@
 var WayFinder = function() {
 
 	function toolbar() {
-		$("#toolbar-login").button({
-			icons: { primary: "ui-icon-gear"}
-		}).click(function() {
-			$("#login-dialog").load("/accounts/login").dialog("open");
+		$("#toolbar-login").button().click(function() {
+			$("#login-dialog").load("/accounts/login/").dialog("open");
 		});
+
+		$("#toolbar-logout").button().click(function() {
+			window.location = "/accounts/logout/";
+		});
+
+		$("#toolbar-register").button().click(function() {
+			$("#register-dialog").load("/register/").dialog("open");
+		});
+
+		$("#toolbar-admin").button().click(function() {
+			window.location = "/admin";
+		});
+		
+		$("#toolbar-useraccess").buttonset();
 
 		$("#toolbar-path").button({
 			icons: { primary: "ui-icon-person" }
 		}).click(function() {});
+
+		$("#toolbar-save").button({
+			icons: { primary: "ui-icon-bookmark" }
+		});
+
+		//Log in message
+		$("#toolbar-buttons").find("p").first().hide().fadeIn("slow");
 	}
 
 	/**
@@ -21,36 +40,6 @@ var WayFinder = function() {
 	 */
 	function modalForms() {
 		/**
-		 * Create new map
-		 */
-		$("#newmap-dialog").dialog({
-			autoOpen: false,
-			height: 250,
-			width: 350,
-			modal: true,
-			buttons: {
-				close: function() {
-					$(this).dialog('close')
-				},
-
-				create: function() {
-					$.ajax({
-						type: "POST",
-						url: "/newmap/",
-						data: $("#newmap-form").serialize(),
-						success: function(data) {
-						}
-					});
-				} 
-			}
-			
-		});
-
-		$("#toolbar-newmap").button({ icons: { primary: "ui-icon-gear"} }).click(function() {
-			$("#newmap-dialog").dialog("open");
-		});
-
-		/**
 		 * Login modal form
 		 */
 		$("#login-dialog").dialog({
@@ -58,9 +47,21 @@ var WayFinder = function() {
 			height: 250,
 			width: 350,
 			modal: true,
+			open: function() {
+				$("#login-dialog").load("/accounts/login/", function() {
+					$("#id_username").focus();
+					$(this).find("input").keypress(function(event) {
+						if (event.which == 13) {
+							event.preventDefault();
+							$("#login-dialog").dialog("option").buttons.login();
+						}
+					});
+				});
+			},
+
 			buttons: {
 				close: function() {
-					$(this).dialog('close')
+					$(this).dialog("close");
 				},
 
 				login: function() {
@@ -82,7 +83,7 @@ var WayFinder = function() {
 		});
 
 		$("#login").click(function() {
-			$("#login-dialog").load("/accounts/login").dialog("open");
+			$("#login-dialog").dialog("open");
 		});
 
 		/**
@@ -93,6 +94,18 @@ var WayFinder = function() {
 			height: 325,
 			width: 800,
 			modal: true,
+			open: function() {
+				$("#register-dialog").load("/register/", function() {
+					$("#id_username").focus();
+					$(this).find("input").keypress(function(event) {
+						if (event.which == 13) {
+							event.preventDefault();
+							$("#register-dialog").dialog("option").buttons.create();
+						}
+					});
+				});
+			},
+
 			buttons: {
 				close: function() {
 					$(this).dialog('close')
@@ -118,7 +131,7 @@ var WayFinder = function() {
 		});
 
 		$("#register").click(function() {
-			$("#register-dialog").load("/register/").dialog("open");
+			$("#register-dialog").dialog("open");
 		});
 	}
 

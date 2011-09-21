@@ -84,9 +84,13 @@ body {
  * Toolbar
  */
 .toolbar {
+	/*
 	left: 45px;
 	position: relative;
-	font-size: 0.9em;
+	*/
+	width: 200px;
+	margin: 0 auto;
+	font-size: 0.8em;
 }
 
 .toolbarheader {
@@ -95,17 +99,17 @@ body {
 	margin: 20px 0px 4px 0px;
 }
 
-#toolbar-radios {
-	margin-top: 25px;
+#toolbar-useraccess {
+	width: 200px;
+	margin: 0 auto;
 }
 
 #toolbar-buttons {
-	width: 125px;
 }
 
 #toolbar-buttons button {
 	margin: 2px 0px 2px 0px;
-	width: 100%;
+	width: 125px;
 }
 
 #toolbar-utilities button {
@@ -154,4 +158,16 @@ th {
 	-moz-box-shadow: -3px 3px 3px 0px #8a888a;
 	box-shadow: -3px 3px 3px 0px #8a888a;
 }
+
+.notification {
+	text-align: center;
+	padding: 5px;
+	margin: 10px 0 10px 0;
+	font-size: 12px !important;
+}
 /* End utilities */
+
+/* jQuery UI Overrides */
+.ui-button-text {
+	font-size: 12px !important;
+}
