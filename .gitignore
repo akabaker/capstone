@@ -1,0 +1,7 @@
+*.pyc
+*.pyo
+*.gz
+access.log
+error.log
+!logs*
+local_settings.py

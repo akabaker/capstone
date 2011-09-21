@@ -1,0 +1,157 @@
+body {
+	background-color: #F1F1F1;
+	font-family: 'Droid Sans', sans-serif !important;
+	height: 100%; margin: 0px; padding: 0px;
+}
+
+#header {
+	height: 75px;
+	color: #FFFFFF;
+	background-color: #333333;
+	border-top 1px solid #F1F1F1;
+}
+
+#header a {
+	color: #dddddd;
+	width: 250px;
+	text-shadow: 0px 1px 1px #666;
+}
+
+#header h1 {
+	padding: 10px;
+	text-shadow: 0px 1px 1px #666;
+	width: 250px;
+	line-height: 55px;
+}
+
+#container, #main, html {
+	height: 100%;
+}
+
+#map-canvas {
+	height: 100%;
+}
+
+/* login, register, and admin links */
+#useraccess {
+	position: absolute;
+	top: 15px;
+	font-size: 0.9em;
+	right: 50px;
+}
+
+#useraccess a:hover {
+	color: #FF9900;
+}
+
+#nav {
+	float: left;
+	width: 248px;
+	border: 1px solid #DDDDDD;
+	padding-bottom: 25px;
+	background: #F5F5F5;
+	/*
+	-webkit-box-shadow: 0px 0px 3px 0px #8a888a;
+	-moz-box-shadow: 0px 0px 3px 0px #8a888a;
+	box-shadow: 0px 0px 3px 0px #8a888a;
+	*/
+}
+	
+#geocode-container {
+	height: 45px;
+	color: #2e2e2e;
+	/*border-left: 0px !important
+	border-left: 1px solid #DDDDDD;*/
+	text-shadow: 0px 1px 1px #ffffff;
+}
+
+#geocode-container span {
+	margin-left: 10px;
+}
+
+#geocode-btn {
+	margin-top: 5px;
+	font-size: 0.9em;
+}
+
+.input-search {
+	padding: 0.5em;
+	margin: 0.5em;
+	width: 30em;
+}
+
+/**
+ * Toolbar
+ */
+.toolbar {
+	left: 45px;
+	position: relative;
+	font-size: 0.9em;
+}
+
+.toolbarheader {
+	color: #666;
+	text-shadow: 0px 1px 1px #ffffff;
+	margin: 20px 0px 4px 0px;
+}
+
+#toolbar-radios {
+	margin-top: 25px;
+}
+
+#toolbar-buttons {
+	width: 125px;
+}
+
+#toolbar-buttons button {
+	margin: 2px 0px 2px 0px;
+	width: 100%;
+}
+
+#toolbar-utilities button {
+	margin: 2px 0px 2px 0px;
+	width: 125px;
+	float: left;
+	clear: both;
+}
+/* End Toolbar */
+
+/**
+ * Login
+ */
+.error {
+	color: #FF0000;
+}
+
+.errorlist {
+	color: #FF0000;
+}
+
+th { 
+	text-align: right;
+}
+/* End login */
+
+/**
+ * Utilities
+ */
+.fleft {
+	float: left;
+}
+
+.fright {
+	float: right;
+}
+
+.shadow-left {
+	-webkit-box-shadow: -2px 0px 4px 0px #8a888a;
+	-moz-box-shadow: -2px 0px 4px 0px #8a888a;
+	box-shadow: -2px 0px 4px 0px #8a888a;
+}
+
+.shadow-left2 {
+	-webkit-box-shadow: -3px 3px 3px 0px #8a888a;
+	-moz-box-shadow: -3px 3px 3px 0px #8a888a;
+	box-shadow: -3px 3px 3px 0px #8a888a;
+}
+/* End utilities */

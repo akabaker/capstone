@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}
+	Development
+{% endblock %}
+
+{% block aside %}
+	<!--
+	<div id="toolbar-radios" class="toolbar">
+		<h5 class="toolbarheader">Start/End Points</h5>
+		<input type="radio" id="toolbar-endpoints" name="tool" /><label for="toolbar-endpoints">Place End Points</label>
+	</div>
+	-->
+	<div id="toolbar-buttons" class="toolbar">
+	{% if user.is_authenticated %}
+		<h5 class="toolbarheader">Ready to go!</h5>
+		<button id="toolbar-newmap">New Map</button>
+		<button id="toolbar-path">Place Path</button>
+	{% else %}
+		<h5 class="toolbarheader">Log in to get started</h5>
+		<button id="toolbar-login">Login</button>
+	{% endif %}
+	</div>
+	<!--
+	<div id="toolbar-utilities" class="toolbar">
+		<h5 class="toolbarheader">Utilities</h5>
+		<button id="toolbar-route">Route</button>
+		<button id="toolbar-save">Save Map</button>
+	</div>
+	-->
+{% endblock aside %}
+
+{% block main-content %}
+	<div id='geocode-container' class='ui-widget-header'>
+		<span>Look up a location:</span>
+		<input id='geocode-address' class='input-search' type='textbox' onkeydown='if (event.keyCode == 13) $("#geocode-btn").click()'>
+		<button id='geocode-btn'>Go</button>
+	</div>
+	<div id='map-canvas' class='ui-helper-clearfix'></div>
+{% endblock %}
