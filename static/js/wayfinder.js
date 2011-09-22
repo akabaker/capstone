@@ -4,6 +4,7 @@
 var WayFinder = function() {
 	var googleMap = Map();
 	var map = googleMap.init();
+	var polyline;
 
 	// Global override for polyline marker image path
 	google.maps.Polyline.prototype.edit.settings.imagePath = "/static/images/" 
@@ -28,12 +29,32 @@ var WayFinder = function() {
 			}
 		}
 
-		var polyline = new google.maps.Polyline({
+		// Initialize polyline in center of map with offset points
+		polyline = new google.maps.Polyline({
 			map: map,
 			path: initialPath,
 		});
 
 		polyline.edit();
+
+		// Add listener to marker if marker is moved
+		google.maps.event.addListener(polyline, 'update_at', function(index, position) {
+			addTitle(position);
+		});
+
+		// Add listener to marker if marker is created
+		google.maps.event.addListener(polyline, 'insert_at', function(index, position) {
+			addTitle(position);
+		});
+		
+		$("#toolbar-path").button({ disabled: true });
+	}
+
+	function addTitle(position) {
+		google.maps.event.addListener(position.marker, "click", function(e) {
+			var title = prompt("title please");
+			position.marker.title = title;
+		});
 	}
 
 	/**
