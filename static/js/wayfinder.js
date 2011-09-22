@@ -2,8 +2,58 @@
  * WayFinder
  */
 var WayFinder = function() {
+	var googleMap = Map();
+	var map = googleMap.init();
+
+	// Global override for polyline marker image path
+	google.maps.Polyline.prototype.edit.settings.imagePath = "/static/images/" 
+
+	/**
+	 * placePath
+	 * Generates initial polyline path
+	 */
+	function placePath() {
+		var mapCenter = map.getCenter();
+		var counter = 0.0005;
+		var initialPath = [];
+
+		for (var i = 0; i < 2; i++) {
+			if (counter == 0.0005) {
+				//initialPath.push(add(mapCenter, counter));
+				initialPath.push(mapCenter);
+				counter += counter + 0.0001;
+			} else {
+				var prev = i - 1;
+				initialPath.push(add(initialPath[prev], counter));
+			}
+		}
+
+		var polyline = new google.maps.Polyline({
+			map: map,
+			path: initialPath,
+		});
+
+		polyline.edit();
+	}
+
+	/**
+	 * add
+	 * @param Object point LatLng object
+	 * @param Float offset Value to add to latlng
+	 * @return LatLng
+	 */
+	function add(point, offset) {
+		var lat = parseFloat(point.lat() + offset);
+		var lng = parseFloat(point.lng() + offset);
+		var latlng = new google.maps.LatLng(lat, lng);
+		return latlng;
+	}
+
 
 	function toolbar() {
+		//Log in message, oh jquery you bastard
+		$("#toolbar-buttons").find("p").first().hide().fadeIn("slow");
+
 		$("#toolbar-login").button().click(function() {
 			$("#login-dialog").load("/accounts/login/").dialog("open");
 		});
@@ -24,14 +74,11 @@ var WayFinder = function() {
 
 		$("#toolbar-path").button({
 			icons: { primary: "ui-icon-person" }
-		}).click(function() {});
+		}).click(placePath);
 
 		$("#toolbar-save").button({
 			icons: { primary: "ui-icon-bookmark" }
 		});
-
-		//Log in message
-		$("#toolbar-buttons").find("p").first().hide().fadeIn("slow");
 	}
 
 	/**
@@ -41,6 +88,8 @@ var WayFinder = function() {
 	function modalForms() {
 		/**
 		 * Login modal form
+		 *
+		 * The open function sets up the focus and keypress listeners for great success.
 		 */
 		$("#login-dialog").dialog({
 			autoOpen: false,
@@ -80,10 +129,6 @@ var WayFinder = function() {
 					});
 				} 
 			}
-		});
-
-		$("#login").click(function() {
-			$("#login-dialog").dialog("open");
 		});
 
 		/**
@@ -129,25 +174,23 @@ var WayFinder = function() {
 				} 
 			}
 		});
-
-		$("#register").click(function() {
-			$("#register-dialog").dialog("open");
-		});
 	}
 
+
+	/**
+	 * initialize
+	 * Bring everything together
+	 */
 	function initialize() {
-		var myMap = Map();
-		var map = myMap.init();
 		toolbar();
 		modalForms();
 
-		// Place CSRF header before any ajax request is sent
+		// Place CSRF header before any ajax request is sent, required for django POST (unless view is csrf_exempt)
 		$.ajaxSetup({
 			beforeSend: function(xhr, settings) {
 				if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
 					// Only send the token to relative URLs i.e. locally.
-					xhr.setRequestHeader("X-CSRFToken",
-										$("#csrfmiddlewaretoken").val());
+					xhr.setRequestHeader("X-CSRFToken", $("#csrfmiddlewaretoken").val());
 				}
 			}
     	});
