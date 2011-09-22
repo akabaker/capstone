@@ -166,6 +166,11 @@ th {
 	margin: 10px 0 10px 0;
 	font-size: 12px !important;
 }
+
+.labels {
+	color: yellow;
+	background-color: #000000;
+}
 /* End utilities */
 
 /* jQuery UI Overrides */

@@ -50,10 +50,16 @@ var WayFinder = function() {
 		$("#toolbar-path").button({ disabled: true });
 	}
 
+	/**
+	 * addTitle
+	 * Label the marker as a destination
+	 * @param Object position Event object
+	 */
 	function addTitle(position) {
 		google.maps.event.addListener(position.marker, "click", function(e) {
 			var title = prompt("title please");
-			position.marker.title = title;
+			position.marker.labelContent = title;
+			position.marker.setMap(map);
 		});
 	}
 
