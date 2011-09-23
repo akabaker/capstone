@@ -7,12 +7,10 @@ var WayFinder = function() {
 	var markers = new google.maps.MVCArray;
 	var markerOptions = {
 		map: map,
-		//icon: "/static/images/vertex.png",
 		draggable: true,
 		raiseOnDrag: true,
 		labelAnchor: new google.maps.Point(10,0),
 		labelClass: "labels",
-		labelContent: ""
 	};
 
 	/**
@@ -29,7 +27,9 @@ var WayFinder = function() {
 		});
 
 		// Add listeners for each marker every time a new marker is inserted into markers
-		google.maps.event.addListener(markers, "insert_at", addMarkerListeners);
+		google.maps.event.addListener(markers, "insert_at", function(index){
+			addMarkerListeners(index);
+		});
 
 		google.maps.event.addListener(markers, "set_at", function() {
 			markers.forEach(function(elem, index) {
@@ -38,8 +38,22 @@ var WayFinder = function() {
 		});
 	}
 
-	function addMarkerListeners() {
-		google.maps.event.addListener(marker, "rightclick", function(event) {
+	/**
+	 * addMarkerListeners
+	 * @param Number index Index of selected marker in markers
+	 */
+	function addMarkerListeners(index) {
+		// Get newly added marker from the markers array and attach listeners to it
+		var marker = markers.getAt(index);
+
+		// Add marker label (destination)
+		google.maps.event.addListener(marker, "click", function() {
+			var label = prompt("Set label");
+			marker.setTitle(label);
+		});
+
+		// Marker right click (delete)
+		google.maps.event.addListener(marker, "rightclick", function() {
 			var clickedMarker = this;
 
 			markers.forEach(function(elem, index) {
@@ -50,15 +64,12 @@ var WayFinder = function() {
 			});
 		});
 
+		// Marker drag (update position in the markers array)
 		google.maps.event.addListener(marker, "dragstart", function() {
-			var startpos = this;
+			var startpos = marker;
 
 			google.maps.event.addListener(marker, "dragend", function() {
-				markers.forEach(function(elem, index) {
-					if (startpos === elem) {
-						markers.setAt(index, elem);
-					}
-				});
+				startpos.setPosition(marker.getPosition());
 			});
 		});
 	}
@@ -85,7 +96,7 @@ var WayFinder = function() {
 		
 		$("#toolbar-useraccess").buttonset();
 
-		$("#toolbar-path").button({
+		$("#toolbar-marker").button({
 			icons: { primary: "ui-icon-person" }
 		}).click(addMarker);
 
@@ -95,11 +106,10 @@ var WayFinder = function() {
 	}
 
 	function saveMap() {
-		polyline.getPath().forEach(function(vertex, index) {
+		markers.forEach(function(elem, index) {
 			console.log(
-				"dest: " + vertex.marker.labelContent + 
-				" coords: " + vertex.marker.getPosition().lat() + 
-				", " + vertex.marker.getPosition().lng()
+				"dest: " + elem.getTitle() + 
+				" coords: " + elem.getPosition().toString()
 			);
 		});
 	}
@@ -109,6 +119,7 @@ var WayFinder = function() {
 	 * django views.
 	 */
 	function modalForms() {
+
 		/**
 		 * Login modal form
 		 *
