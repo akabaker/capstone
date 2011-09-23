@@ -82,16 +82,12 @@ var Map = function() {
 
 		var latlng = new google.maps.LatLng(lat, lng);
 		var myOptions = {
-			zoom: 19,
+			zoom: 18,
 			center: latlng,
 			mapTypeId: google.maps.MapTypeId.HYBRID
 		};
 
 		var map = new google.maps.Map(document.getElementById('map-canvas'), myOptions);
-
-		//google.maps.event.addListener(map, 'bounds_changed', function(event) {
-		//	var bounds = map.getBounds();
-		//});
 
 		return map;
 	}

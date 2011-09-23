@@ -4,78 +4,64 @@
 var WayFinder = function() {
 	var googleMap = Map();
 	var map = googleMap.init();
-	var polyline;
-
-	// Global override for polyline marker image path
-	google.maps.Polyline.prototype.edit.settings.imagePath = "/static/images/" 
-
-	/**
-	 * placePath
-	 * Generates initial polyline path
-	 */
-	function placePath() {
-		var mapCenter = map.getCenter();
-		var counter = 0.0005;
-		var initialPath = [];
-
-		for (var i = 0; i < 2; i++) {
-			if (counter == 0.0005) {
-				//initialPath.push(add(mapCenter, counter));
-				initialPath.push(mapCenter);
-				counter += counter + 0.0001;
-			} else {
-				var prev = i - 1;
-				initialPath.push(add(initialPath[prev], counter));
-			}
-		}
-
-		// Initialize polyline in center of map with offset points
-		polyline = new google.maps.Polyline({
-			map: map,
-			path: initialPath,
-		});
-
-		polyline.edit();
-
-		// Add listener to marker if marker is moved
-		google.maps.event.addListener(polyline, 'update_at', function(index, position) {
-			addTitle(position);
-		});
-
-		// Add listener to marker if marker is created
-		google.maps.event.addListener(polyline, 'insert_at', function(index, position) {
-			addTitle(position);
-		});
-		
-		$("#toolbar-path").button({ disabled: true });
-	}
+	var markers = new google.maps.MVCArray;
+	var markerOptions = {
+		map: map,
+		//icon: "/static/images/vertex.png",
+		draggable: true,
+		raiseOnDrag: true,
+		labelAnchor: new google.maps.Point(10,0),
+		labelClass: "labels",
+		labelContent: ""
+	};
 
 	/**
-	 * addTitle
-	 * Label the marker as a destination
-	 * @param Object position Event object
+	 * addMarker
 	 */
-	function addTitle(position) {
-		google.maps.event.addListener(position.marker, "click", function(e) {
-			var title = prompt("title please");
-			position.marker.labelContent = title;
-			position.marker.setMap(map);
+	function addMarker() {
+		google.maps.event.clearListeners(map);
+		google.maps.event.addListener(map, "click", function(event) {
+			markerOptions.position = event.latLng,
+
+        	marker = new MarkerWithLabel(markerOptions);
+
+			markers.push(marker);
+		});
+
+		// Add listeners for each marker every time a new marker is inserted into markers
+		google.maps.event.addListener(markers, "insert_at", addMarkerListeners);
+
+		google.maps.event.addListener(markers, "set_at", function() {
+			markers.forEach(function(elem, index) {
+				console.log("index: " + index + " " + elem.getPosition().toString());
+			});
 		});
 	}
 
-	/**
-	 * add
-	 * @param Object point LatLng object
-	 * @param Float offset Value to add to latlng
-	 * @return LatLng
-	 */
-	function add(point, offset) {
-		var lat = parseFloat(point.lat() + offset);
-		var lng = parseFloat(point.lng() + offset);
-		var latlng = new google.maps.LatLng(lat, lng);
-		return latlng;
-	}
+	function addMarkerListeners() {
+		google.maps.event.addListener(marker, "rightclick", function(event) {
+			var clickedMarker = this;
 
+			markers.forEach(function(elem, index) {
+				if (clickedMarker === elem ) {
+					markers.removeAt(index);
+					clickedMarker.setMap(null);
+				}
+			});
+		});
+
+		google.maps.event.addListener(marker, "dragstart", function() {
+			var startpos = this;
+
+			google.maps.event.addListener(marker, "dragend", function() {
+				markers.forEach(function(elem, index) {
+					if (startpos === elem) {
+						markers.setAt(index, elem);
+					}
+				});
+			});
+		});
+	}
 
 	function toolbar() {
 		//Log in message, oh jquery you bastard
@@ -101,10 +87,20 @@ var WayFinder = function() {
 
 		$("#toolbar-path").button({
 			icons: { primary: "ui-icon-person" }
-		}).click(placePath);
+		}).click(addMarker);
 
 		$("#toolbar-save").button({
 			icons: { primary: "ui-icon-bookmark" }
+		}).click(saveMap);
+	}
+
+	function saveMap() {
+		polyline.getPath().forEach(function(vertex, index) {
+			console.log(
+				"dest: " + vertex.marker.labelContent + 
+				" coords: " + vertex.marker.getPosition().lat() + 
+				", " + vertex.marker.getPosition().lng()
+			);
 		});
 	}
 
