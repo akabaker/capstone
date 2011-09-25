@@ -5,13 +5,45 @@ var WayFinder = function() {
 	var googleMap = Map();
 	var map = googleMap.init();
 	var markers = new google.maps.MVCArray;
+	var saveMapURI = "/savemap/";
 	var markerOptions = {
 		map: map,
 		draggable: true,
 		raiseOnDrag: true,
-		labelAnchor: new google.maps.Point(10,0),
+		labelAnchor: new google.maps.Point(20,0),
 		labelClass: "labels",
+		labelContent: ""
 	};
+	// Check if point is within map bounds
+	function isInBounds(point) {
+		if (point >= bounds.sw && point <= bounds.nw) {
+			console.log("point in bounds");
+		}
+	}
+
+	function getMapBounds() {
+		var bounds = {
+			sw: [ 
+				map.getBounds().getSouthWest().lat(),
+				map.getBounds().getSouthWest().lng(),
+			],
+			ne: [ 
+				map.getBounds().getNorthEast().lat(),
+				map.getBounds().getNorthEast().lng(),
+			]
+		};
+
+		return bounds;
+	}
+
+	function getMapCenter() {
+		var center = [
+			map.getBounds().getCenter().lat(),
+			map.getBounds().getCenter().lng(),
+		];
+
+		return center;
+	}
 
 	/**
 	 * addMarker
@@ -36,6 +68,8 @@ var WayFinder = function() {
 				console.log("index: " + index + " " + elem.getPosition().toString());
 			});
 		});
+	
+		$("#toolbar-marker").button({ disabled: "true" });
 	}
 
 	/**
@@ -48,8 +82,9 @@ var WayFinder = function() {
 
 		// Add marker label (destination)
 		google.maps.event.addListener(marker, "click", function() {
-			var label = prompt("Set label");
-			marker.setTitle(label);
+			var name = prompt("Set label");
+			marker.labelContent = name;
+			marker.setMap(map);
 		});
 
 		// Marker right click (delete)
@@ -86,6 +121,10 @@ var WayFinder = function() {
 			window.location = "/accounts/logout/";
 		});
 
+		$("#toolbar-newmap").button().click(function() {
+			$("#newmap-dialog").dialog("open");
+		});
+
 		$("#toolbar-register").button().click(function() {
 			$("#register-dialog").load("/register/").dialog("open");
 		});
@@ -106,12 +145,39 @@ var WayFinder = function() {
 	}
 
 	function saveMap() {
-		markers.forEach(function(elem, index) {
-			console.log(
-				"dest: " + elem.getTitle() + 
-				" coords: " + elem.getPosition().toString()
-			);
+		var data = prepareMarkers();
+
+		$.ajax({
+			type: "POST",
+			url: saveMapURI,
+			data: JSON.stringify(data),
+			success: function(result) {
+				console.log("from server");
+				console.log(result);
+			}
 		});
+	}
+
+	function prepareMarkers() {
+		var mapData = [];
+
+		// All we need from our markers list is the coordinates of the marker and title if it has one
+		markers.forEach(function(elem, index) {
+			mapData.push({
+				lat: elem.getPosition().lat(),
+				lng: elem.getPosition().lng(),
+				name: elem.labelContent
+			});
+		});
+
+		return mapData;
+	}
+
+	function logCoords(elem) {
+		console.log(
+			"dest: " + elem.getTitle() + 
+			" coords: " + elem.getPosition().toString()
+		);
 	}
 
 	/**
@@ -119,6 +185,58 @@ var WayFinder = function() {
 	 * django views.
 	 */
 	function modalForms() {
+		// Create new map dialog
+		$("#newmap-dialog").dialog({
+			autoOpen: false,
+			height: 250,
+			width: 350,
+			modal: true,
+			open: function() {
+				$("#newmap-dialog").load("/newmap/", function() {
+					$("#id_name").focus();
+					$(this).find("input").keypress(function(event) {
+						if (event.which == 13) {
+							event.preventDefault();
+							$("#newmap-dialog").dialog("option").buttons.create();
+						}
+					});
+				});
+			},
+
+			buttons: {
+				close: function() {
+					$(this).dialog("close");
+				},
+
+				create: function() {
+					var bounds = getMapBounds();
+
+					var bounds_sw_lat = $("#newmap-form").find(":hidden[name='bounds_sw_lat']").val(bounds.sw[0]);
+					var bounds_sw_lng = $("#newmap-form").find(":hidden[name='bounds_sw_lng']").val(bounds.sw[1]);
+					var bounds_ne_lat = $("#newmap-form").find(":hidden[name='bounds_ne_lat']").val(bounds.ne[0]);
+					var bounds_ne_lng = $("#newmap-form").find(":hidden[name='bounds_ne_lng']").val(bounds.ne[1]);
+
+					//$(bounds_ne).val(bounds.ne);
+
+					$.ajax({
+						type: "POST",
+						url: "/newmap/",
+						data: $("#newmap-form").serialize(),
+						success: function(result) {
+							// Check and see if any errors are present
+							var html = $(result).find(".errorlist");
+							// If there are errors present, rebuild the dialog with the output from view
+							if (html) {
+								$("#newmap-dialog").html(result);
+							} else {
+								window.location = "/builder";
+							}
+						}
+						
+					});
+				}
+			}
+		});
 
 		/**
 		 * Login modal form

@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import patterns, include, url
-from wayfinder.builder.views import builder, geo_code, find_path, register, save_state
+from wayfinder.builder.views import builder, geo_code, find_path, register, save_state, savemap, newmap
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -13,6 +13,8 @@ urlpatterns = patterns('',
 	(r'^findpath/$', find_path),
 	(r'^admin/', include(admin.site.urls)),
 	(r'^register/$', register),
+	(r'^savemap/$', savemap),
+	(r'^newmap/$', newmap),
 	(r'^accounts/login/$', 'django.contrib.auth.views.login'),
 	(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/builder'}),
     # Examples:
