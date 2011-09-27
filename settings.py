@@ -1,5 +1,5 @@
 # Django settings for wayfinder project.
-import os
+import os, sys
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 APP_NAME = "builder"
@@ -111,7 +111,7 @@ TEMPLATE_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     os.path.join(PROJECT_ROOT, "%s/templates") % APP_NAME,
-    os.path.join(PROJECT_ROOT, "%s/templates/partials") % APP_NAME,
+    #os.path.join(PROJECT_ROOT, "%s/templates/partials") % APP_NAME,
 )
 
 INSTALLED_APPS = (

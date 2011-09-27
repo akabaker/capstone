@@ -24,6 +24,7 @@ var Map = function() {
 		// Geocode result is a json object
 		var lat = obj.results[0].geometry.location.lat;
 		var lng = obj.results[0].geometry.location.lng;
+		var zip = obj.results[0].address_components[7].short_name;
 
 		// Rebuild the map using the returned coordinates
 		initialize(lat, lng);
@@ -53,6 +54,7 @@ var Map = function() {
 			url: geoCodeURI,
 			data: JSON.stringify(data),
 			success: function(data) {
+				console.log(data);
 				// We have to call the callback from an anon function to pass the self (the Map object) reference
 				geoCodeCallback(data);
 			}
@@ -98,6 +100,30 @@ var Map = function() {
 	return {
 		init: function() {
 			return initialize();
+		},
+
+		getMapBounds: function(map) {
+			var bounds = {
+				sw: [ 
+					map.getBounds().getSouthWest().lat(),
+					map.getBounds().getSouthWest().lng(),
+				],
+				ne: [ 
+					map.getBounds().getNorthEast().lat(),
+					map.getBounds().getNorthEast().lng(),
+				]
+			};
+
+			return bounds;
+		},
+
+		getMapCenter: function(map) {
+			var center = [
+				map.getBounds().getCenter().lat(),
+				map.getBounds().getCenter().lng(),
+			];
+
+			return center;
 		}
 	};
 };
