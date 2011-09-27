@@ -21,50 +21,47 @@ var WayFinder = function() {
 		}
 	}
 
+	/**
+	 * createPath
+	 * Create two node polyline
+	 */
 	function createPath() {
-		google.maps.event.clearListeners(map);
-
-		var pair = [];
+		var pair = new google.maps.MVCArray;
 		google.maps.event.addListener(map, "click", function(event) {
 			markerOptions.position = event.latLng,
         	marker = new MarkerWithLabel(markerOptions);
         	nodes.push(marker);
         	pair.push(marker);
 		
-			if (pair.length === 2) {
+			if (pair.getLength() === 2) {
 				$("#toolbar-path").button("enable");
 				pathComplete();
 			} else {
 				$("#toolbar-path").button("disable");
 			}
+			
 		});
 
-		google.maps.event.addListener(nodes, "insert_at", function(index) {
-			checkMarker(index, pair);
+		nodes.forEach(function(elem, index) {
+			checkMarker(elem);	
 		});
 
-		function checkMarker(index, pair) {
-			var marker = nodes.getAt(index);
+		function checkMarker(marker) {
 			google.maps.event.addListener(marker, "click", function() {
 				console.log(pair.length);
 				pair.push(this);
 
-				if (pair.length == 2) {
+				if (pair.getLength() === 2) {
 					$("#toolbar-path").button("enable");
-					console.log('2');
 					pathComplete();
-				} else {
-					pair.push(marker);
-					$("#toolbar-path").button("disable");
 				}
 			});
 		}
 
 		function pathComplete() {
 			var path = [];
-			for (var i = 0; i < pair.length; i++) {
-				path.push(pair[i].getPosition());
-				//console.log(pair[i].getPosition());
+			for (var i = 0; i < pair.getLength(); i++) {
+				path.push(pair.getAt(i).getPosition());
 			}
 			var segment = new google.maps.Polyline({
 				path: path,
@@ -76,9 +73,9 @@ var WayFinder = function() {
 			segment.setMap(map);
 			paths.push(segment);
 
-			pair = [];
+			pair.clear();
 			google.maps.event.clearListeners(map);
-			console.log('complete');
+			console.log("complete");
 		}
 	}
 
@@ -107,47 +104,6 @@ var WayFinder = function() {
 		});
 	
 		$("#toolbar-marker").button({ disabled: "true" });
-	}
-
-	/**
-	 * selectPairs
-	 */
-	function selectPairs() {
-		google.maps.event.clearListeners(map);
-
-		if (markers.getLength() < 2) {
-			alert("Need at least 2 markers");
-		} else {
-			//var pair = new google.maps.MVCArray;
-			var pair = [];
-			markers.forEach(function(elem, index) {
-				var marker = markers.getAt(index);
-				google.maps.event.clearListeners(marker);
-
-				google.maps.event.addListener(marker, "click", function() {
-				google.maps.event.clearListeners(marker);
-					marker.setDraggable(false);
-					pair.push(marker.getPosition());
-				
-					if (pair.length === 2) {
-						var segment = new google.maps.Polyline({
-							path: pair,
-							strokeColor: "#FF0000",
-							strokeOpacity: 1.0,
-							strokeWeight: 2
-						});
-						console.log(pair);
-
-						segment.setMap(map);
-						paths.push(segment);
-						pair = [];
-						paths.forEach(function(e, i) {
-							console.log(e.getPath());
-						});
-					}
-				});
-			});
-		}
 	}
 
 	/**
@@ -240,8 +196,15 @@ var WayFinder = function() {
 	}
 
 	function saveMap() {
-		var data = prepareMarkers();
+		//var data = prepareMarkers();
 
+		paths.forEach(function(elem, index) {
+			var paths = elem.getPath();
+			paths.forEach(function(path, i) {
+				console.log(path);
+			});
+		});
+		/*
 		$.ajax({
 			type: "POST",
 			url: "/savemap/",
@@ -251,6 +214,7 @@ var WayFinder = function() {
 				console.log(result);
 			}
 		});
+		*/
 	}
 
 	function prepareMarkers() {
