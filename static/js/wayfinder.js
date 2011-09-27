@@ -45,7 +45,7 @@ var WayFinder = function() {
 			});
 		});
 	
-		$("#toolbar-marker").button({ disabled: "true" });
+		$("#toolbar-marker").button("disable");
 	}
 
 	/**
@@ -59,6 +59,7 @@ var WayFinder = function() {
 		} else {
 			//var pair = new google.maps.MVCArray;
 			var pair = [];
+			$("#toolbar-pairs").button("disabled");
 			markers.forEach(function(elem, index) {
 				var marker = markers.getAt(index);
 				google.maps.event.clearListeners(marker);
@@ -75,11 +76,15 @@ var WayFinder = function() {
 							strokeOpacity: 1.0,
 							strokeWeight: 2
 						});
-						console.log(pair);
+
+						google.maps.event.addListener(segment, "click", function() {
+							this.setMap(null);
+						});
 
 						segment.setMap(map);
 						paths.push(segment);
 						pair = [];
+						$("#toolbar-pairs").button("enabled");
 						paths.forEach(function(e, i) {
 							console.log(e.getPath());
 						});
