@@ -8,7 +8,7 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, load_backend
 from django.contrib.auth.models import AnonymousUser
-from wayfinder.builder.models import Node
+from wayfinder.builder.models import Nodes
 from wayfinder.builder.userinfo import UserInfo
 from django import forms
 import urllib

@@ -4,12 +4,12 @@
 var WayFinder = function() {
 	var googleMap = Map();
 	var map = googleMap.init();
-	var markers = new google.maps.MVCArray;
+	var nodes = new google.maps.MVCArray;
 	var paths = new google.maps.MVCArray;
 	var markerOptions = {
 		map: map,
-		draggable: true,
-		raiseOnDrag: true,
+		draggable: false,
+		raiseOnDrag: false,
 		labelAnchor: new google.maps.Point(20,0),
 		labelClass: "labels",
 		labelContent: ""
@@ -18,6 +18,67 @@ var WayFinder = function() {
 	function isInBounds(point) {
 		if (point >= bounds.sw && point <= bounds.nw) {
 			console.log("point in bounds");
+		}
+	}
+
+	function createPath() {
+		google.maps.event.clearListeners(map);
+
+		var pair = [];
+		google.maps.event.addListener(map, "click", function(event) {
+			markerOptions.position = event.latLng,
+        	marker = new MarkerWithLabel(markerOptions);
+        	nodes.push(marker);
+        	pair.push(marker);
+		
+			if (pair.length === 2) {
+				$("#toolbar-path").button("enable");
+				pathComplete();
+			} else {
+				$("#toolbar-path").button("disable");
+			}
+		});
+
+		google.maps.event.addListener(nodes, "insert_at", function(index) {
+			checkMarker(index, pair);
+		});
+
+		function checkMarker(index, pair) {
+			var marker = nodes.getAt(index);
+			google.maps.event.addListener(marker, "click", function() {
+				console.log(pair.length);
+				pair.push(this);
+
+				if (pair.length == 2) {
+					$("#toolbar-path").button("enable");
+					console.log('2');
+					pathComplete();
+				} else {
+					pair.push(marker);
+					$("#toolbar-path").button("disable");
+				}
+			});
+		}
+
+		function pathComplete() {
+			var path = [];
+			for (var i = 0; i < pair.length; i++) {
+				path.push(pair[i].getPosition());
+				//console.log(pair[i].getPosition());
+			}
+			var segment = new google.maps.Polyline({
+				path: path,
+				strokeColor: "#FF0000",
+				strokeOpacity: 1.0,
+				strokeWeight: 2
+			});
+
+			segment.setMap(map);
+			paths.push(segment);
+
+			pair = [];
+			google.maps.event.clearListeners(map);
+			console.log('complete');
 		}
 	}
 
@@ -93,15 +154,32 @@ var WayFinder = function() {
 	 * addMarkerListeners
 	 * @param Number index Index of selected marker in markers
 	 */
-	function addMarkerListeners(index) {
+	function addMarkerListeners(index, pair) {
 		// Get newly added marker from the markers array and attach listeners to it
 		var marker = markers.getAt(index);
 
 		// Add marker label (destination)
-		google.maps.event.addListener(marker, "click", function() {
+		google.maps.event.addListener(marker, "dblclick", function() {
 			var name = prompt("Set label");
 			marker.labelContent = name;
 			marker.setMap(map);
+		});
+
+		google.maps.event.addListener(marker, "click", function() {
+			pair.push(marker.getPosition());
+
+			if (pair.length == 2) {
+				var segment = new google.maps.Polyline({
+					path: pair,
+					strokeColor: "#FF0000",
+					strokeOpacity: 1.0,
+					strokeWeight: 2
+				});
+
+				segment.setMap(map);
+				paths.push(segment);
+				pair = [];
+			}
 		});
 
 		// Marker right click (delete)
@@ -152,9 +230,9 @@ var WayFinder = function() {
 			icons: { primary: "ui-icon-person" }
 		}).click(addMarker);
 
-		$("#toolbar-pairs").button({
+		$("#toolbar-path").button({
 			icons: { primary: "ui-icon-pencil" }
-		}).click(selectPairs);
+		}).click(createPath);
 
 		$("#toolbar-save").button({
 			icons: { primary: "ui-icon-bookmark" }
