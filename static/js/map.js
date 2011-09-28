@@ -9,8 +9,6 @@ var Map = function() {
 	var geoCodeURI = '/geocode/';
 	var sensor = 'false';
 	var address = 'Columbia, MO';
-
-	$("#geocode-btn").button({ icons: { primary: "ui-icon-search"} });
 	
 	/**
 	* Parses geocode results and calls init to reload the map canvas
@@ -54,11 +52,17 @@ var Map = function() {
 			url: geoCodeURI,
 			data: JSON.stringify(data),
 			success: function(data) {
-				console.log(data);
 				// We have to call the callback from an anon function to pass the self (the Map object) reference
 				geoCodeCallback(data);
 			}
 		});
+	}
+
+	// Check if point is within map bounds
+	function isInBounds(point) {
+		if (point >= bounds.sw && point <= bounds.nw) {
+			console.log("point in bounds");
+		}
 	}
 
 	/**
@@ -74,6 +78,7 @@ var Map = function() {
 		lat = typeof(lat) != 'undefined' ? lat : 38.94617;
 		lng = typeof(lng) != 'undefined' ? lng : -92.32866; 
 
+		/*
 		$("#geocode-btn").click(function() {
 			try {
 				geoCode($("#geocode-address").val(), geoCodeURL, sensor);
@@ -81,6 +86,7 @@ var Map = function() {
 				console.log(error.message);
 			}
 		});
+		*/
 
 		var latlng = new google.maps.LatLng(lat, lng);
 		var myOptions = {

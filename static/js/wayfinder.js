@@ -14,11 +14,18 @@ var WayFinder = function() {
 		labelClass: "labels",
 		labelContent: ""
 	};
-	// Check if point is within map bounds
-	function isInBounds(point) {
-		if (point >= bounds.sw && point <= bounds.nw) {
-			console.log("point in bounds");
-		}
+
+	/**
+	 * geoCode
+	 * @param String latlng Reverse geocode based on latlng
+	 */
+	function geoCode(address) {
+		var geocoder = new google.maps.Geocoder();
+		geocoder.geocode({'address': address}, function(results, status) {
+			if (status === google.maps.GeocoderStatus.OK) {
+				map.setCenter(results[0].geometry.location);
+			}
+		});
 	}
 
 	/**
@@ -30,6 +37,18 @@ var WayFinder = function() {
 		google.maps.event.addListener(map, "click", function(event) {
 			markerOptions.position = event.latLng,
         	marker = new MarkerWithLabel(markerOptions);
+
+			google.maps.event.addListener(marker, "click", function() {
+				console.log('clicked');
+				pair.push(this);
+
+				if (pair.getLength() === 2) {
+					console.log('length is 2');
+					$("#toolbar-path").button("enable");
+					pathComplete();
+				}
+			});
+
         	nodes.push(marker);
         	pair.push(marker);
 		
@@ -39,125 +58,79 @@ var WayFinder = function() {
 			} else {
 				$("#toolbar-path").button("disable");
 			}
-			
+
 		});
 
-		nodes.forEach(function(elem, index) {
-			checkMarker(elem);	
+		//nodes.forEach(function(elem, index) {
+		//	checkMarker(elem);	
+		//});
+
+		// Path listeners
+		google.maps.event.addListener(paths, "insert_at", function(index) {
+			var path = paths.getAt(index);
+			google.maps.event.addListener(path, "click", function(event) {
+				path.setMap(null);
+			});
 		});
 
+		// Check if marker was clicked as part of a path pair
 		function checkMarker(marker) {
 			google.maps.event.addListener(marker, "click", function() {
-				console.log(pair.length);
 				pair.push(this);
 
 				if (pair.getLength() === 2) {
+					console.log('length is 2');
 					$("#toolbar-path").button("enable");
 					pathComplete();
 				}
 			});
 		}
-
+	
+		// Check if the path is complete
 		function pathComplete() {
 			var path = [];
 			for (var i = 0; i < pair.getLength(); i++) {
 				path.push(pair.getAt(i).getPosition());
 			}
-			var segment = new google.maps.Polyline({
-				path: path,
-				strokeColor: "#FF0000",
-				strokeOpacity: 1.0,
-				strokeWeight: 2
-			});
-
-			segment.setMap(map);
-			paths.push(segment);
-
-			pair.clear();
-			google.maps.event.clearListeners(map);
-			console.log("complete");
-		}
-	}
-
-	/**
-	 * addMarker
-	 */
-	function addMarker() {
-		google.maps.event.clearListeners(map);
-		google.maps.event.addListener(map, "click", function(event) {
-			markerOptions.position = event.latLng,
-
-        	marker = new MarkerWithLabel(markerOptions);
-
-			markers.push(marker);
-		});
-
-		// Add listeners for each marker every time a new marker is inserted into markers
-		google.maps.event.addListener(markers, "insert_at", function(index){
-			addMarkerListeners(index);
-		});
-
-		google.maps.event.addListener(markers, "set_at", function() {
-			markers.forEach(function(elem, index) {
-				console.log("index: " + index + " " + elem.getPosition().toString());
-			});
-		});
-	
-		$("#toolbar-marker").button({ disabled: "true" });
-	}
-
-	/**
-	 * addMarkerListeners
-	 * @param Number index Index of selected marker in markers
-	 */
-	function addMarkerListeners(index, pair) {
-		// Get newly added marker from the markers array and attach listeners to it
-		var marker = markers.getAt(index);
-
-		// Add marker label (destination)
-		google.maps.event.addListener(marker, "dblclick", function() {
-			var name = prompt("Set label");
-			marker.labelContent = name;
-			marker.setMap(map);
-		});
-
-		google.maps.event.addListener(marker, "click", function() {
-			pair.push(marker.getPosition());
-
-			if (pair.length == 2) {
+			if (isPathEqual(path)) {
+				console.log('path already placed');
+			} else {
 				var segment = new google.maps.Polyline({
-					path: pair,
+					path: path,
 					strokeColor: "#FF0000",
 					strokeOpacity: 1.0,
-					strokeWeight: 2
+					strokeWeight: 3
 				});
 
 				segment.setMap(map);
 				paths.push(segment);
-				pair = [];
+
+				pair.clear();
+				//google.maps.event.clearListeners(map);
+				//google.maps.event.clearListeners(marker);
+				console.log("complete");
 			}
-		});
+		}
+	}
 
-		// Marker right click (delete)
-		google.maps.event.addListener(marker, "rightclick", function() {
-			var clickedMarker = this;
+	function isPathEqual(pair) {
+		var returnCode = false
 
-			markers.forEach(function(elem, index) {
-				if (clickedMarker === elem ) {
-					markers.removeAt(index);
-					clickedMarker.setMap(null);
-				}
+		var pathPair = [];
+		paths.forEach(function(elem, index) {
+			var path = elem.getPath();
+			path.forEach(function(marker, index) {
+				pathPair.push(marker);
 			});
+			
+			if (pair == pathPair) {
+				returnCode = true;
+			} else {
+				returnCode = false;	
+			}
+			pathPair = [];
 		});
-
-		// Marker drag (update position in the markers array)
-		google.maps.event.addListener(marker, "dragstart", function() {
-			var startpos = marker;
-
-			google.maps.event.addListener(marker, "dragend", function() {
-				startpos.setPosition(marker.getPosition());
-			});
-		});
+		return returnCode;
 	}
 
 	function toolbar() {
@@ -182,10 +155,6 @@ var WayFinder = function() {
 		
 		$("#toolbar-useraccess").buttonset();
 
-		$("#toolbar-marker").button({
-			icons: { primary: "ui-icon-person" }
-		}).click(addMarker);
-
 		$("#toolbar-path").button({
 			icons: { primary: "ui-icon-pencil" }
 		}).click(createPath);
@@ -193,17 +162,17 @@ var WayFinder = function() {
 		$("#toolbar-save").button({
 			icons: { primary: "ui-icon-bookmark" }
 		}).click(saveMap);
+		
+		$("#geocode-btn").button({ 
+			icons: { primary: "ui-icon-search" } 
+		}).click(function() {
+			geoCode($("#geocode-address").val());
+		});
 	}
 
 	function saveMap() {
+		console.log(paths.getLength());
 		//var data = prepareMarkers();
-
-		paths.forEach(function(elem, index) {
-			var paths = elem.getPath();
-			paths.forEach(function(path, i) {
-				console.log(path);
-			});
-		});
 		/*
 		$.ajax({
 			type: "POST",
@@ -234,28 +203,6 @@ var WayFinder = function() {
 		});
 
 		return mapData;
-	}
-
-	/**
-	 * geoCode
-	 * @param String latlng Reverse geocode based on latlng
-	 */
-	function geoCode(latlng) {
-		var data = {};
-		var geocoder = new google.maps.Geocoder();
-		geocoder.geocode({'location': latlng}, function(results, status) {
-			if (status === google.maps.GeocoderStatus.OK) {
-				data.results = results;
-			}
-		});
-		return data;
-	}
-
-	function logCoords(elem) {
-		console.log(
-			"dest: " + elem.getTitle() + 
-			" coords: " + elem.getPosition().toString()
-		);
 	}
 
 	/**
