@@ -11,7 +11,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.core import serializers
 from wayfinder.builder.models import Nodes, Paths
-from wayfinder.builder.userinfo import UserInfo
 from decimal import Decimal
 from django import forms
 import urllib
@@ -26,6 +25,10 @@ def user_from_session_key(session_key):
       return auth_backend.get_user(user_id)
     else:
       return AnonymousUser()
+
+# Must render template with the correct RequestContext for access to user auth data
+def builder(request):
+	return render_to_response('builder.html', context_instance=RequestContext(request))
 
 def load_nodes(request):
 	jsondata = serializers.serialize('json', Nodes.objects.all(), fields=('lat','lng','label'))
@@ -60,7 +63,15 @@ def delete_node(request):
 	n.delete()
 	return HttpResponse('node deleted')
 
-@login_required
+@csrf_exempt
+def clear_map(request):
+	p = Paths.objects.all()
+	p.delete()
+	n = Nodes.objects.all()
+	n.delete()
+
+	return HttpResponse('map cleared')
+
 @csrf_exempt
 def create_node(request):
 	node = json.loads(request.raw_post_data)

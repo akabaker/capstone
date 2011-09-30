@@ -53,8 +53,6 @@ var WayFinder = function() {
 	function createNode(marker) {
 		node = prepNode(marker);
 
-		console.log(JSON.stringify(node));
-
 		$.ajax({
 			type: "POST",
 			url: "/createnode/",
@@ -465,9 +463,9 @@ var WayFinder = function() {
 		if (clearOk) {
 			$.ajax({
 				type: "POST",
-				url: "/delete/",
+				url: "/clearmap/",
 				success: function(result) {
-					console.log(result);
+					window.location("/builder");
 				}
 			});
 		}
