@@ -24,3 +24,6 @@ class Nodes(models.Model):
 class Paths(models.Model):
 	node1 = models.ForeignKey(Nodes, related_name="node1")
 	node2 = models.ForeignKey(Nodes, related_name="node2")
+
+	class Meta:
+		unique_together = (('node1', 'node2'),)
