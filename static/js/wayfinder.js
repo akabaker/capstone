@@ -76,18 +76,13 @@ var WayFinder = function() {
 				console.log(result);
 			}
 		});
-<<<<<<< HEAD
-	
-		$("#toolbar-marker").button("disable");
-=======
->>>>>>> tst
+		//$("#toolbar-marker").button("disable");
 	}
 
 	/**
 	 * prepNode
 	 * Return object containing relevant node values
 	 */
-<<<<<<< HEAD
 	function selectPairs() {
 		google.maps.event.clearListeners(map);
 
