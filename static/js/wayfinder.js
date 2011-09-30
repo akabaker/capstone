@@ -4,53 +4,90 @@
 var WayFinder = function() {
 	var googleMap = Map();
 	var map = googleMap.init();
-	var markers = new google.maps.MVCArray;
+	var nodes = new google.maps.MVCArray;
 	var paths = new google.maps.MVCArray;
 	var markerOptions = {
 		map: map,
-		draggable: true,
-		raiseOnDrag: true,
+		draggable: false,
+		raiseOnDrag: false,
 		labelAnchor: new google.maps.Point(20,0),
 		labelClass: "labels",
-		labelContent: ""
+		//labelContent: null,
 	};
-	// Check if point is within map bounds
-	function isInBounds(point) {
-		if (point >= bounds.sw && point <= bounds.nw) {
-			console.log("point in bounds");
-		}
+
+	/**
+	 * geoCode
+	 * @param String latlng Reverse geocode based on latlng
+	 */
+	function geoCode(address) {
+		var geocoder = new google.maps.Geocoder();
+		geocoder.geocode({'address': address}, function(results, status) {
+			if (status === google.maps.GeocoderStatus.OK) {
+				map.setCenter(results[0].geometry.location);
+			}
+		});
 	}
 
 	/**
-	 * addMarker
+	 * deleteNode
+	 * Delete node from database
 	 */
-	function addMarker() {
-		google.maps.event.clearListeners(map);
-		google.maps.event.addListener(map, "click", function(event) {
-			markerOptions.position = event.latLng,
+	function deleteNode(marker) {
+		marker.setMap(null);
+		node = prepNode(marker);
 
-        	marker = new MarkerWithLabel(markerOptions);
-
-			markers.push(marker);
+		$.ajax({
+			type: "POST",
+			url: "/deletenode/",
+			data: JSON.stringify(node),
+			success: function(result) {
+				console.log(result);
+			}
 		});
+	}
 
-		// Add listeners for each marker every time a new marker is inserted into markers
-		google.maps.event.addListener(markers, "insert_at", function(index){
-			addMarkerListeners(index);
-		});
+	/**
+	 * createNode
+	 * Save node object to database
+	 */
+	function createNode(marker) {
+		node = prepNode(marker);
 
-		google.maps.event.addListener(markers, "set_at", function() {
-			markers.forEach(function(elem, index) {
-				console.log("index: " + index + " " + elem.getPosition().toString());
-			});
+		console.log(JSON.stringify(node));
+
+		$.ajax({
+			type: "POST",
+			url: "/createnode/",
+			data: JSON.stringify(node),
+			success: function(result) {
+				console.log(result)
+			}
 		});
+	}
+
+	function updateNode(marker) {
+		var node = prepNode(marker);
+
+		$.ajax({
+			type: "POST",
+			url: "/updatenode/",
+			data: JSON.stringify(node),
+			success: function(result) {
+				console.log(result);
+			}
+		});
+<<<<<<< HEAD
 	
 		$("#toolbar-marker").button("disable");
+=======
+>>>>>>> tst
 	}
 
 	/**
-	 * selectPairs
+	 * prepNode
+	 * Return object containing relevant node values
 	 */
+<<<<<<< HEAD
 	function selectPairs() {
 		google.maps.event.clearListeners(map);
 
@@ -91,134 +128,241 @@ var WayFinder = function() {
 					}
 				});
 			});
+=======
+	function prepNode(marker) {
+		var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : null;
+		var lat = marker.getPosition().lat();
+		var lng = marker.getPosition().lng();
+
+		node = {
+			lat: lat,
+			lng: lng,
+			label: label
+>>>>>>> tst
 		}
+
+		return node;
 	}
 
 	/**
-	 * addMarkerListeners
-	 * @param Number index Index of selected marker in markers
+	 * createPath
+	 * Send edge to database
 	 */
-	function addMarkerListeners(index) {
-		// Get newly added marker from the markers array and attach listeners to it
-		var marker = markers.getAt(index);
-
-		// Add marker label (destination)
-		google.maps.event.addListener(marker, "click", function() {
-			var name = prompt("Set label");
-			marker.labelContent = name;
-			marker.setMap(map);
-		});
-
-		// Marker right click (delete)
-		google.maps.event.addListener(marker, "rightclick", function() {
-			var clickedMarker = this;
-
-			markers.forEach(function(elem, index) {
-				if (clickedMarker === elem ) {
-					markers.removeAt(index);
-					clickedMarker.setMap(null);
-				}
-			});
-		});
-
-		// Marker drag (update position in the markers array)
-		google.maps.event.addListener(marker, "dragstart", function() {
-			var startpos = marker;
-
-			google.maps.event.addListener(marker, "dragend", function() {
-				startpos.setPosition(marker.getPosition());
-			});
-		});
-	}
-
-	function toolbar() {
-		//Log in message, oh jquery you bastard
-		$("#toolbar-buttons").find("p").first().hide().fadeIn("slow");
-
-		$("#toolbar-login").button().click(function() {
-			$("#login-dialog").load("/accounts/login/").dialog("open");
-		});
-
-		$("#toolbar-logout").button().click(function() {
-			window.location = "/accounts/logout/";
-		});
-
-		$("#toolbar-register").button().click(function() {
-			$("#register-dialog").load("/register/").dialog("open");
-		});
-
-		$("#toolbar-admin").button().click(function() {
-			window.location = "/admin";
-		});
-		
-		$("#toolbar-useraccess").buttonset();
-
-		$("#toolbar-marker").button({
-			icons: { primary: "ui-icon-person" }
-		}).click(addMarker);
-
-		$("#toolbar-pairs").button({
-			icons: { primary: "ui-icon-pencil" }
-		}).click(selectPairs);
-
-		$("#toolbar-save").button({
-			icons: { primary: "ui-icon-bookmark" }
-		}).click(saveMap);
-	}
-
-	function saveMap() {
-		var data = prepareMarkers();
+	function createPath(path) {
+		var edge = prepPath(path);
 
 		$.ajax({
 			type: "POST",
-			url: "/savemap/",
-			data: JSON.stringify(data),
+			url: "/createpath/",
+			//data: JSON.stringify(edge),
+			data: $.param(edge),
 			success: function(result) {
-				console.log("from server");
 				console.log(result);
 			}
 		});
 	}
 
-	function prepareMarkers() {
-		var mapData = [];
+	/**
+	 * prepPath
+	 * Create object to stringfy and save to database
+	 * @return object containing node1 and node2 lat/lng
+	 */
+	function prepPath(path) {
+		var mapPath = path.getPath();
+		var node1 = mapPath.getAt(0);
+		var node2 = mapPath.getAt(1);
+
+		var pathNode = {
+			node1: [
+				node1.lat(),
+				node2.lng()
+			],
+
+			node2: [
+				node2.lat(),
+				node2.lng()
+			]
+		};
+
+		console.log(path.getPath());
+		console.log(pathNode);
+		return pathNode;
+	}
+
+	/**
+	 * addMarkerListeners
+	 */
+	function addMarkerListeners(marker) {
+		// Delete node
+		/*
+		google.maps.event.addListener(marker, "rightclick", function() {
+			deleteNode(this);
+		});
+		*/
+		google.maps.event.addListener(marker, "dblclick", function() {
+			var label = prompt("Enter a location name");
+			marker.labelContent = label;
+			marker.setMap(map);
+			updateNode(marker);
+		});
+	}
+
+	/**
+	 * loadNodes
+	 * Query database and return all nodes
+	 */
+	function loadNodes() {
+		$.ajax({
+			type: "GET",
+			url: "/loadnodes/",
+			success: function(result) {
+				var nodes = JSON.parse(result);
+				var nodesLength = nodes.length;
+				for (var i = 0; i < nodesLength; i++) {
+					var latLng = new google.maps.LatLng(nodes[i].fields.lat, nodes[i].fields.lng);
+					markerOptions.position = latLng;
+
+					var marker = new MarkerWithLabel(markerOptions);
+					marker.labelContent = nodes[i].fields.label;
+
+					// Re-add marker listeners
+					addMarkerListeners(marker);
+				}
+			}
+		});
+	}
+
+	/**
+	 * startPath
+	 * Create two node polyline
+	 */
+	function startPath() {
+		$("#toolbar-path").button("disable");
+		var pair = new google.maps.MVCArray;
+		google.maps.event.addListener(map, "click", function(event) {
+			markerOptions.position = event.latLng,
+        	marker = new MarkerWithLabel(markerOptions);
+
+			// Add listeners!
+			addMarkerListeners(marker);
+
+			google.maps.event.addListener(marker, "click", function() {
+				pair.push(this);
+
+				if (pair.getLength() === 2) {
+					pathComplete();
+				}
+			});
+
+        	//nodes.push(marker);
+        	pair.push(marker);
+        	createNode(marker);
+		
+			if (pair.getLength() === 2) {
+				pathComplete();
+			} 
+		});
+	
+		// Check if the path is complete
+		function pathComplete() {
+			var path = [];
+			pair.forEach(function(elem, index) {
+				path.push(elem.getPosition());
+			});
+
+			var segment = new google.maps.Polyline({
+				path: path,
+				strokeColor: "#FF0000",
+				strokeOpacity: 1.0,
+				strokeWeight: 3
+			});
+
+			if (isPathEqual(segment)) {
+				console.log('paths equal');
+				pair.clear();
+			} else {
+				segment.setMap(map);
+				//paths.push(segment);
+				//createPath(segment);
+
+				pair.clear();
+			}
+		}
+	}
+
+	/**
+	 * isPathEqual
+	 * For each path in paths, check to see if the current path (the one being placed) is already in paths
+	 */
+	function isPathEqual(path) {
+		var returnCode = false
+		paths.forEach(function(elem, index) {
+			console.log(index);
+
+			//TODO make this less wtf
+			if (elem.getPath().getAt(0).equals(path.getPath().getAt(0)) && elem.getPath().getAt(1).equals(path.getPath().getAt(1)) ||
+				elem.getPath().getAt(1).equals(path.getPath().getAt(0)) && elem.getPath().getAt(0).equals(path.getPath().getAt(1))) {
+				returnCode = true;
+			} else {
+				returnCode = false;
+			}
+		});
+		return returnCode;
+	}
+
+	function saveMap() {
+		var data = prepare();
+
+		$.ajax({
+			type: "POST",
+			url: "/savestate/",
+			data: JSON.stringify(data),
+			success: function(result) {
+				console.log(result);
+			}
+		});
+	}
+
+	function prepare() {
+		var mapNodes = [];
+		var mapPaths = [];
 
 		// All we need from our markers list is the coordinates of the marker and title if it has one
-		markers.forEach(function(elem, index) {
+		nodes.forEach(function(elem, index) {
 			var label = typeof(elem.labelContent) != 'undefined' ? elem.labelContent : '';
 			var lat = elem.getPosition().lat();
 			var lng = elem.getPosition().lng();
 
-			mapData.push({
+			mapNodes.push({
 				lat: lat,
 				lng: lng,
 				label: label,
 			});
 		});
 
-		return mapData;
-	}
+		paths.forEach(function(elem, index) {
+			var path = elem.getPath();
+			var node1 = path.getAt(0);
+			var node2 = path.getAt(1);
 
-	/**
-	 * geoCode
-	 * @param String latlng Reverse geocode based on latlng
-	 */
-	function geoCode(latlng) {
-		var data = {};
-		var geocoder = new google.maps.Geocoder();
-		geocoder.geocode({'location': latlng}, function(results, status) {
-			if (status === google.maps.GeocoderStatus.OK) {
-				data.results = results;
-			}
+			mapPaths.push({
+				node1: [
+					node1.lat(),
+					node1.lng()
+				],
+				node2: [
+					node2.lat(),
+					node2.lng()
+				]
+			});
 		});
-		return data;
-	}
 
-	function logCoords(elem) {
-		console.log(
-			"dest: " + elem.getTitle() + 
-			" coords: " + elem.getPosition().toString()
-		);
+		mapData = {
+			nodes: mapNodes,
+			paths: mapPaths
+		};
+
+		return mapData;
 	}
 
 	/**
@@ -326,6 +470,57 @@ var WayFinder = function() {
 		});
 	}
 
+	function toolbar() {
+		//Login message, oh jquery you bastard
+		$("#toolbar-buttons").find("p").first().hide().fadeIn("slow");
+
+		$("#toolbar-login").button().click(function() {
+			$("#login-dialog").load("/accounts/login/").dialog("open");
+		});
+
+		$("#toolbar-logout").button().click(function() {
+			window.location = "/accounts/logout/";
+		});
+
+		$("#toolbar-register").button().click(function() {
+			$("#register-dialog").load("/register/").dialog("open");
+		});
+
+		$("#toolbar-admin").button().click(function() {
+			window.location = "/admin";
+		});
+		
+		$("#toolbar-useraccess").buttonset();
+
+		$("#toolbar-path").button({
+			icons: { primary: "ui-icon-pencil" }
+		}).click(startPath);
+
+		$("#toolbar-clear").button({
+			icons: { primary: "ui-icon-bookmark" }
+		}).click(clearMap);
+		
+		$("#geocode-btn").button({ 
+			icons: { primary: "ui-icon-search" } 
+		}).click(function() {
+			geoCode($("#geocode-address").val());
+		});
+	}
+
+	function clearMap() {
+		var clearOk = confirm("Are you sure?");
+
+		if (clearOk) {
+			$.ajax({
+				type: "POST",
+				url: "/delete/",
+				success: function(result) {
+					console.log(result);
+				}
+			});
+		}
+	}
+
 	/**
 	 * initialize
 	 * Bring everything together
@@ -333,6 +528,7 @@ var WayFinder = function() {
 	function initialize() {
 		toolbar();
 		modalForms();
+		loadNodes();
 
 		// Place CSRF header before any ajax request is sent, required for django POST (unless view is csrf_exempt)
 		$.ajaxSetup({

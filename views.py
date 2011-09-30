@@ -7,12 +7,10 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, load_backend
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.core import serializers
 from wayfinder.builder.models import Nodes, Paths
 from wayfinder.builder.userinfo import UserInfo
-from decimal import Decimal
 from django import forms
 import urllib
 
@@ -28,65 +26,27 @@ def user_from_session_key(session_key):
       return AnonymousUser()
 
 def load_nodes(request):
-	jsondata = serializers.serialize('json', Nodes.objects.all(), fields=('lat','lng','label'))
-	return HttpResponse(json.dumps(jsondata), mimetype='application/json')
+    jsondata = serializers.serialize('json', Nodes.objects.all(), fields=('lat','lng','label'))
+    return HttpResponse(json.dumps(jsondata), mimetype='application/json')
 
 @csrf_exempt
 def update_node(request):
-	node = json.loads(request.raw_post_data)
-	n = Nodes.objects.filter(lat=node.get('lat'), lng=node.get('lng'))
+    node = json.loads(request.raw_post_data)
+    n = Nodes.objects.filter(lat=node.get('lat'), lng=node.get('lng'))
 
-	if not n:
-		n = Nodes(
-			lat = node.get('lat'),
-			lng = node.get('lng'),
-			label = node.get('label'),
-		)
-		n.save()
-		return HttpResponse('node created')
+    if not n:
+        n = Nodes(
+            lat = node.get('lat'),
+            lng = node.get('lng'),
+            label = node.get('label'),
+        )
+        n.save()
+        return HttpResponse('node created')
 
-	else:
-		d = {}
-		d['label'] = node.get('label')
-		# Update model with kwargs expansion
-		n.update(**d)
-
-	return HttpResponse('node updated')
-
-@csrf_exempt
-def delete_node(request):
-	node = json.loads(request.raw_post_data)
-	n = Nodes.objects.filter(lat=node.get('lat'), lng=node.get('lng'))
-	n.delete()
-	return HttpResponse('node deleted')
-
-@login_required
-@csrf_exempt
-def create_node(request):
-	node = json.loads(request.raw_post_data)
-
-	label = node.get('label')
-	if label == "":
-		label = None
-
-	n = Nodes(
-		lat = node.get('lat'),
-		lng = node.get('lng'),
-		label = label,
-	)
-
-	n.save()
-
-	return HttpResponse('node created')
-
-@csrf_exempt
-def create_path(request):
-	import decimal
-	path = json.loads(request.raw_post_data)
-	#node1 = Nodes.objects.filter(lat=pathNode1[0], lng=pathNode1[1])	
-	#node2 = Nodes.objects.filter(lat=pathNode2[0], lng=pathNode2[1])	
-
-	return HttpResponse(path)
+    else:
+    	d = {}
+    	d['label'] = node.get('label')
+    	n.update(**d)
 
 def register(request):
     if request.method == 'POST':
