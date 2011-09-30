@@ -76,54 +76,12 @@ var WayFinder = function() {
 				console.log(result);
 			}
 		});
-		//$("#toolbar-marker").button("disable");
 	}
 
 	/**
 	 * prepNode
 	 * Return object containing relevant node values
 	 */
-	function selectPairs() {
-		google.maps.event.clearListeners(map);
-
-		if (markers.getLength() < 2) {
-			alert("Need at least 2 markers");
-		} else {
-			//var pair = new google.maps.MVCArray;
-			var pair = [];
-			$("#toolbar-pairs").button("disabled");
-			markers.forEach(function(elem, index) {
-				var marker = markers.getAt(index);
-				google.maps.event.clearListeners(marker);
-
-				google.maps.event.addListener(marker, "click", function() {
-				google.maps.event.clearListeners(marker);
-					marker.setDraggable(false);
-					pair.push(marker.getPosition());
-				
-					if (pair.length === 2) {
-						var segment = new google.maps.Polyline({
-							path: pair,
-							strokeColor: "#FF0000",
-							strokeOpacity: 1.0,
-							strokeWeight: 2
-						});
-
-						google.maps.event.addListener(segment, "click", function() {
-							this.setMap(null);
-						});
-
-						segment.setMap(map);
-						paths.push(segment);
-						pair = [];
-						$("#toolbar-pairs").button("enabled");
-						paths.forEach(function(e, i) {
-							console.log(e.getPath());
-						});
-					}
-				});
-			});
-=======
 	function prepNode(marker) {
 		var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : null;
 		var lat = marker.getPosition().lat();
@@ -133,7 +91,6 @@ var WayFinder = function() {
 			lat: lat,
 			lng: lng,
 			label: label
->>>>>>> tst
 		}
 
 		return node;
