@@ -12,7 +12,7 @@ var WayFinder = function() {
 		raiseOnDrag: false,
 		labelAnchor: new google.maps.Point(20,0),
 		labelClass: "labels",
-		//labelContent: null,
+		labelContent: "",
 	};
 
 	/**
@@ -83,7 +83,7 @@ var WayFinder = function() {
 	 * Return object containing relevant node values
 	 */
 	function prepNode(marker) {
-		var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : null;
+		var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : "";
 		var lat = marker.getPosition().lat();
 		var lng = marker.getPosition().lng();
 
