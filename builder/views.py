@@ -91,6 +91,11 @@ def create_node(request):
 	return HttpResponse('node created')
 
 @csrf_exempt
+def load_paths(request):
+	jsondata = serializers.serialize('json', Paths.objects.all(), use_natural_keys=True)
+	return HttpResponse(json.dumps(jsondata), mimetype='application/json')
+
+@csrf_exempt
 def create_path(request):
 	path = json.loads(request.raw_post_data)
 
