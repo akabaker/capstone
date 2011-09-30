@@ -92,12 +92,22 @@ def create_node(request):
 
 @csrf_exempt
 def create_path(request):
-	import decimal
 	path = json.loads(request.raw_post_data)
-	#node1 = Nodes.objects.filter(lat=pathNode1[0], lng=pathNode1[1])	
-	#node2 = Nodes.objects.filter(lat=pathNode2[0], lng=pathNode2[1])	
 
-	return HttpResponse(path)
+	pathNode1 = path.get('node1')
+	pathNode2 = path.get('node2')
+
+	node1 = Nodes.objects.get(lat=pathNode1[0], lng=pathNode1[1])	
+	node2 = Nodes.objects.get(lat=pathNode2[0], lng=pathNode2[1])	
+
+	p = Paths(
+		node1 = node1,
+		node2 = node2
+	)
+
+	p.save()
+
+	return HttpResponse('path created')
 
 def register(request):
     if request.method == 'POST':

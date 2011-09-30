@@ -52,6 +52,7 @@ var WayFinder = function() {
 	 */
 	function createNode(marker) {
 		node = prepNode(marker);
+		console.log(JSON.stringify(node));	
 
 		$.ajax({
 			type: "POST",
@@ -100,12 +101,11 @@ var WayFinder = function() {
 	 */
 	function createPath(path) {
 		var edge = prepPath(path);
-
+		console.log(JSON.stringify(edge));	
 		$.ajax({
 			type: "POST",
 			url: "/createpath/",
-			//data: JSON.stringify(edge),
-			data: $.param(edge),
+			data: JSON.stringify(edge),
 			success: function(result) {
 				console.log(result);
 			}
@@ -125,7 +125,7 @@ var WayFinder = function() {
 		var pathNode = {
 			node1: [
 				node1.lat(),
-				node2.lng()
+				node1.lng()
 			],
 
 			node2: [
@@ -133,9 +133,6 @@ var WayFinder = function() {
 				node2.lng()
 			]
 		};
-
-		console.log(path.getPath());
-		console.log(pathNode);
 		return pathNode;
 	}
 
@@ -233,7 +230,7 @@ var WayFinder = function() {
 			} else {
 				segment.setMap(map);
 				//paths.push(segment);
-				//createPath(segment);
+				createPath(segment);
 
 				pair.clear();
 			}
@@ -465,7 +462,7 @@ var WayFinder = function() {
 				type: "POST",
 				url: "/clearmap/",
 				success: function(result) {
-					window.location("/builder");
+					window.location = "/builder";
 				}
 			});
 		}
