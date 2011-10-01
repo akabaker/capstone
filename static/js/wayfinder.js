@@ -96,6 +96,36 @@ var WayFinder = function() {
 	}
 
 	/**
+	 * loadPaths
+	 * Loads paths from database
+	 */
+	function loadPaths() {
+		$.ajax({
+			type: "GET",
+			url: "/loadpaths/",
+			success: function(result) {
+				var paths = JSON.parse(result);
+				var pathsLength = paths.length;
+				for (var i = 0; i < pathsLength; i++) {
+
+					var path = [];
+					path.push(new google.maps.LatLng(paths[i].fields.node1[0], paths[i].fields.node1[1]));
+					path.push(new google.maps.LatLng(paths[i].fields.node2[0], paths[i].fields.node2[1]));
+
+					var segment = new google.maps.Polyline({
+						path: path,
+						strokeColor: "#FF0000",
+						strokeOpacity: 1.0,
+						strokeWeight: 3
+					});
+
+					segment.setMap(map);
+				}
+			}
+		});
+	}
+
+	/**
 	 * createPath
 	 * Send edge to database
 	 */
@@ -476,6 +506,7 @@ var WayFinder = function() {
 		toolbar();
 		modalForms();
 		loadNodes();
+		loadPaths();
 
 		// Place CSRF header before any ajax request is sent, required for django POST (unless view is csrf_exempt)
 		$.ajaxSetup({
