@@ -6,6 +6,7 @@ var WayFinder = function() {
 	var map = googleMap.init();
 	var nodes = new google.maps.MVCArray;
 	var paths = new google.maps.MVCArray;
+	var pair = new google.maps.MVCArray;
 	var markerOptions = {
 		map: map,
 		draggable: false,
@@ -167,6 +168,15 @@ var WayFinder = function() {
 	}
 
 	/**
+	 * addPathListeners
+	 */
+	function addPathListeners(path) {
+		google.maps.event.addListener(path, "rightclick", function() {
+			path.setMap(null);
+		});
+	}
+
+	/**
 	 * addMarkerListeners
 	 */
 	function addMarkerListeners(marker) {
@@ -209,16 +219,22 @@ var WayFinder = function() {
 		});
 	}
 
+	(function mapListeners() {
+		google.maps.event.addListener(map, "click", function(event) {
+			markerOptions.position = event.latLng;
+        	var marker = new MarkerWithLabel(markerOptions);
+			startPath(marker);
+		});
+	})();
+
 	/**
 	 * startPath
 	 * Create two node polyline
 	 */
-	function startPath() {
-		$("#toolbar-path").button("disable");
-		var pair = new google.maps.MVCArray;
-		google.maps.event.addListener(map, "click", function(event) {
-			markerOptions.position = event.latLng,
-        	marker = new MarkerWithLabel(markerOptions);
+	function startPath(marker) {
+		//google.maps.event.addListener(map, "click", function(event) {
+			//markerOptions.position = event.latLng;
+        	//var marker = new MarkerWithLabel(markerOptions);
 
 			// Add listeners!
 			addMarkerListeners(marker);
@@ -231,39 +247,42 @@ var WayFinder = function() {
 				}
 			});
 
-        	//nodes.push(marker);
-        	pair.push(marker);
-        	createNode(marker);
+			//nodes.push(marker);
+			pair.push(marker);
+			createNode(marker);
 		
 			if (pair.getLength() === 2) {
 				pathComplete();
 			} 
+		//});
+	}
+
+	/**
+	 * pathComplete
+	 * Checks if path is complete (two nodes placed)
+	 */
+	function pathComplete() {
+		var path = [];
+		pair.forEach(function(elem, index) {
+			path.push(elem.getPosition());
 		});
-	
-		// Check if the path is complete
-		function pathComplete() {
-			var path = [];
-			pair.forEach(function(elem, index) {
-				path.push(elem.getPosition());
-			});
 
-			var segment = new google.maps.Polyline({
-				path: path,
-				strokeColor: "#FF0000",
-				strokeOpacity: 1.0,
-				strokeWeight: 3
-			});
+		var segment = new google.maps.Polyline({
+			path: path,
+			strokeColor: "#FF0000",
+			strokeOpacity: 1.0,
+			strokeWeight: 3
+		});
 
-			if (isPathEqual(segment)) {
-				console.log('paths equal');
-				pair.clear();
-			} else {
-				segment.setMap(map);
-				//paths.push(segment);
-				createPath(segment);
+		if (isPathEqual(segment)) {
+			console.log('paths equal');
+			pair.clear();
+		} else {
+			segment.setMap(map);
+			//paths.push(segment);
+			createPath(segment);
 
-				pair.clear();
-			}
+			pair.clear();
 		}
 	}
 
@@ -287,66 +306,11 @@ var WayFinder = function() {
 		return returnCode;
 	}
 
-	function saveMap() {
-		var data = prepare();
-
-		$.ajax({
-			type: "POST",
-			url: "/savestate/",
-			data: JSON.stringify(data),
-			success: function(result) {
-				console.log(result);
-			}
-		});
-	}
-
-	function prepare() {
-		var mapNodes = [];
-		var mapPaths = [];
-
-		// All we need from our markers list is the coordinates of the marker and title if it has one
-		nodes.forEach(function(elem, index) {
-			var label = typeof(elem.labelContent) != 'undefined' ? elem.labelContent : '';
-			var lat = elem.getPosition().lat();
-			var lng = elem.getPosition().lng();
-
-			mapNodes.push({
-				lat: lat,
-				lng: lng,
-				label: label,
-			});
-		});
-
-		paths.forEach(function(elem, index) {
-			var path = elem.getPath();
-			var node1 = path.getAt(0);
-			var node2 = path.getAt(1);
-
-			mapPaths.push({
-				node1: [
-					node1.lat(),
-					node1.lng()
-				],
-				node2: [
-					node2.lat(),
-					node2.lng()
-				]
-			});
-		});
-
-		mapData = {
-			nodes: mapNodes,
-			paths: mapPaths
-		};
-
-		return mapData;
-	}
-
 	/**
 	 * Create modal forms - the login and registration forms are from built-in 
 	 * django views.
 	 */
-	function modalForms() {
+	(function modalForms() {
 		/**
 		 * Login modal form
 		 *
@@ -435,7 +399,7 @@ var WayFinder = function() {
 				} 
 			}
 		});
-	}
+	})();
 
 	function destList() {
 		$.ajax({
@@ -447,7 +411,21 @@ var WayFinder = function() {
 		});
 	}
 
-	function toolbar() {
+	function clearMap() {
+		var clearOk = confirm("Are you sure?");
+
+		if (clearOk) {
+			$.ajax({
+				type: "POST",
+				url: "/clearmap/",
+				success: function(result) {
+					window.location = "/builder";
+				}
+			});
+		}
+	}
+
+	(function toolbar() {
 		//Login message, oh jquery you bastard
 		$("#toolbar-buttons").find("p").first().hide().fadeIn("slow");
 
@@ -469,9 +447,11 @@ var WayFinder = function() {
 		
 		$("#toolbar-useraccess").buttonset();
 
+		/*
 		$("#toolbar-path").button({
 			icons: { primary: "ui-icon-pencil" }
 		}).click(startPath);
+		*/
 
 		$("#toolbar-clear").button({
 			icons: { primary: "ui-icon-bookmark" }
@@ -482,31 +462,16 @@ var WayFinder = function() {
 		}).click(function() {
 			geoCode($("#geocode-address").val());
 		});
-	}
-
-	function clearMap() {
-		var clearOk = confirm("Are you sure?");
-
-		if (clearOk) {
-			$.ajax({
-				type: "POST",
-				url: "/clearmap/",
-				success: function(result) {
-					window.location = "/builder";
-				}
-			});
-		}
-	}
+	})();
 
 	/**
 	 * initialize
 	 * Bring everything together
 	 */
 	function initialize() {
-		toolbar();
-		modalForms();
 		loadNodes();
 		loadPaths();
+		startPath();
 
 		// Place CSRF header before any ajax request is sent, required for django POST (unless view is csrf_exempt)
 		$.ajaxSetup({
