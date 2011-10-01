@@ -53,7 +53,7 @@ var WayFinder = function() {
 	 */
 	function createNode(marker) {
 		node = prepNode(marker);
-		console.log(JSON.stringify(node));	
+		//console.log(JSON.stringify(node));	
 
 		$.ajax({
 			type: "POST",
@@ -65,6 +65,10 @@ var WayFinder = function() {
 		});
 	}
 
+	/**
+	 * updateNode
+	 * Update node label
+	 */
 	function updateNode(marker) {
 		var node = prepNode(marker);
 
@@ -132,7 +136,7 @@ var WayFinder = function() {
 	 */
 	function createPath(path) {
 		var edge = prepPath(path);
-		console.log(JSON.stringify(edge));	
+		//console.log(JSON.stringify(edge));	
 		$.ajax({
 			type: "POST",
 			url: "/createpath/",
@@ -186,11 +190,22 @@ var WayFinder = function() {
 			deleteNode(this);
 		});
 		*/
+
+		// Add marker label
 		google.maps.event.addListener(marker, "dblclick", function() {
 			var label = prompt("Enter a location name");
 			marker.labelContent = label;
 			marker.setMap(map);
 			updateNode(marker);
+		});
+
+		// Add to node to path
+		google.maps.event.addListener(marker, "click", function() {
+			pair.push(this);
+
+			if (pair.getLength() === 2) {
+				pathComplete();
+			}
 		});
 	}
 
@@ -205,25 +220,34 @@ var WayFinder = function() {
 			success: function(result) {
 				var nodes = JSON.parse(result);
 				var nodesLength = nodes.length;
-				for (var i = 0; i < nodesLength; i++) {
-					var latLng = new google.maps.LatLng(nodes[i].fields.lat, nodes[i].fields.lng);
-					markerOptions.position = latLng;
 
-					var marker = new MarkerWithLabel(markerOptions);
-					marker.labelContent = nodes[i].fields.label;
+				if (nodesLength != 0) {
+					for (var i = 0; i < nodesLength; i++) {
+						var latLng = new google.maps.LatLng(nodes[i].fields.lat, nodes[i].fields.lng);
+						markerOptions.position = latLng;
 
-					// Re-add marker listeners
-					addMarkerListeners(marker);
+						var marker = new MarkerWithLabel(markerOptions);
+						marker.labelContent = nodes[i].fields.label;
+
+						// Place marker and re-add listeners
+						startPath(marker, true);
+					}
+				} else {
+					console.log('no previous nodes');
 				}
 			}
 		});
 	}
 
+	/**
+	 * mapListeners
+	 * Starts when DOM is loaded
+	 */
 	(function mapListeners() {
 		google.maps.event.addListener(map, "click", function(event) {
 			markerOptions.position = event.latLng;
         	var marker = new MarkerWithLabel(markerOptions);
-			startPath(marker);
+			startPath(marker, false);
 		});
 	})();
 
@@ -231,22 +255,12 @@ var WayFinder = function() {
 	 * startPath
 	 * Create two node polyline
 	 */
-	function startPath(marker) {
-		//google.maps.event.addListener(map, "click", function(event) {
-			//markerOptions.position = event.latLng;
-        	//var marker = new MarkerWithLabel(markerOptions);
+	function startPath(marker, isLoadedMarker) {
+		// Add listeners
+		addMarkerListeners(marker);
 
-			// Add listeners!
-			addMarkerListeners(marker);
-
-			google.maps.event.addListener(marker, "click", function() {
-				pair.push(this);
-
-				if (pair.getLength() === 2) {
-					pathComplete();
-				}
-			});
-
+		// If marker is new
+		if (!isLoadedMarker) {
 			//nodes.push(marker);
 			pair.push(marker);
 			createNode(marker);
@@ -254,7 +268,7 @@ var WayFinder = function() {
 			if (pair.getLength() === 2) {
 				pathComplete();
 			} 
-		//});
+		}
 	}
 
 	/**
@@ -471,7 +485,6 @@ var WayFinder = function() {
 	function initialize() {
 		loadNodes();
 		loadPaths();
-		startPath();
 
 		// Place CSRF header before any ajax request is sent, required for django POST (unless view is csrf_exempt)
 		$.ajaxSetup({
