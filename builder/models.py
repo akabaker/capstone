@@ -8,8 +8,10 @@ class NodesManager(models.Manager):
 class Nodes(models.Model):
 	objects = NodesManager()
 
-	lat = models.FloatField()
-	lng = models.FloatField()
+	#lat = models.FloatField()
+	#lng = models.FloatField()
+	lat = models.DecimalField(max_digits=16, decimal_places=14)
+	lng = models.DecimalField(max_digits=16, decimal_places=14)
 	label = models.CharField(max_length=100, null=True, unique=True)
 
 	def __unicode__(self):

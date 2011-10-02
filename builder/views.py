@@ -90,6 +90,27 @@ def create_node(request):
 
 	return HttpResponse('node created')
 
+
+@csrf_exempt
+def delete_path(request):
+	path = json.loads(request.raw_post_data)
+
+	pathNode1 = path.get('node1')
+	pathNode2 = path.get('node2')
+
+	node1 = Nodes.objects.get(lat=pathNode1[0], lng=pathNode1[1])	
+	node2 = Nodes.objects.get(lat=pathNode2[0], lng=pathNode2[1])	
+
+	p = Paths.objects.filter(node1=node1, node2=node2)
+
+	p.delete()
+	node1.delete()
+	node2.delete()
+
+	return HttpResponse('path deleted')
+	#return HttpResponse("node1: {0} node2: {1}".format(node1, node2))
+	#return HttpResponse(json.dumps(pathNode1), mimetype='application/json')
+
 @csrf_exempt
 def load_paths(request):
 	jsondata = serializers.serialize('json', Paths.objects.all(), use_natural_keys=True)

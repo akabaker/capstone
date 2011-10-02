@@ -125,6 +125,7 @@ var WayFinder = function() {
 					});
 
 					segment.setMap(map);
+					//addPathListeners(segment);
 				}
 			}
 		});
@@ -172,24 +173,13 @@ var WayFinder = function() {
 	}
 
 	/**
-	 * addPathListeners
-	 */
-	function addPathListeners(path) {
-		google.maps.event.addListener(path, "rightclick", function() {
-			path.setMap(null);
-		});
-	}
-
-	/**
 	 * addMarkerListeners
 	 */
 	function addMarkerListeners(marker) {
 		// Delete node
-		/*
 		google.maps.event.addListener(marker, "rightclick", function() {
 			deleteNode(this);
 		});
-		*/
 
 		// Add marker label
 		google.maps.event.addListener(marker, "dblclick", function() {
@@ -205,6 +195,34 @@ var WayFinder = function() {
 
 			if (pair.getLength() === 2) {
 				pathComplete();
+			}
+		});
+	}
+
+	/**
+	 * addPathListeners
+	 */
+	function addPathListeners(path) {
+		// Delete path
+		google.maps.event.addListener(path, "rightclick", function() {
+			var path = prepPath(this);
+			deletePath(path);
+		});
+	}
+
+	/**
+	 * deletePath
+	 * Delete path
+	 */
+	function deletePath(path) {
+		var pathNodes = JSON.stringify(path);	
+
+		$.ajax({
+			type: "POST",
+			url: "/deletepath/",
+			data: pathNodes,
+			success: function(result) {
+				console.log(result);
 			}
 		});
 	}
@@ -295,7 +313,7 @@ var WayFinder = function() {
 			segment.setMap(map);
 			//paths.push(segment);
 			createPath(segment);
-
+			//addPathListeners(segment);
 			pair.clear();
 		}
 	}
@@ -458,6 +476,7 @@ var WayFinder = function() {
 		$("#toolbar-admin").button().click(function() {
 			window.location = "/admin";
 		});
+
 		
 		$("#toolbar-useraccess").buttonset();
 
@@ -470,7 +489,7 @@ var WayFinder = function() {
 		$("#toolbar-clear").button({
 			icons: { primary: "ui-icon-bookmark" }
 		}).click(clearMap);
-		
+
 		$("#geocode-btn").button({ 
 			icons: { primary: "ui-icon-search" } 
 		}).click(function() {
