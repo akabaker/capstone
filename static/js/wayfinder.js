@@ -9,7 +9,7 @@ var WayFinder = function() {
 	var pair = new google.maps.MVCArray;
 	var markerOptions = {
 		map: map,
-		draggable: false,
+		draggable: true,
 		raiseOnDrag: false,
 		labelAnchor: new google.maps.Point(20,0),
 		labelClass: "labels",
@@ -34,15 +34,16 @@ var WayFinder = function() {
 	 * Delete node from database
 	 */
 	function deleteNode(marker) {
-		marker.setMap(null);
 		node = prepNode(marker);
 
 		$.ajax({
 			type: "POST",
 			url: "/deletenode/",
-			data: JSON.stringify(node),
+			//data: JSON.stringify(node),
+			data: $.param(node),
 			success: function(result) {
 				console.log(result);
+				marker.setMap(null);
 			}
 		});
 	}
@@ -53,12 +54,12 @@ var WayFinder = function() {
 	 */
 	function createNode(marker) {
 		node = prepNode(marker);
-		//console.log(JSON.stringify(node));	
 
 		$.ajax({
 			type: "POST",
 			url: "/createnode/",
-			data: JSON.stringify(node),
+			//data: JSON.stringify(node),
+			data: $.param(node),
 			success: function(result) {
 				console.log(result)
 			}
@@ -75,9 +76,10 @@ var WayFinder = function() {
 		$.ajax({
 			type: "POST",
 			url: "/updatenode/",
-			data: JSON.stringify(node),
+			//data: JSON.stringify(node),
+			data: $.param(node),
 			success: function(result) {
-				console.log(result);
+				marker.setMap(map);
 			}
 		});
 	}
@@ -88,9 +90,18 @@ var WayFinder = function() {
 	 */
 	function prepNode(marker) {
 		var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : "";
-		var lat = marker.getPosition().lat();
-		var lng = marker.getPosition().lng();
+		var coords = marker.getPosition().toUrlValue(6);
+		//var lat = marker.getPosition().lat();
+		//var lng = marker.getPosition().lng();
+		
+		node = {
+			coords: coords,	
+			label: label
+		}
 
+		return node;
+
+		/*
 		node = {
 			lat: lat,
 			lng: lng,
@@ -98,6 +109,7 @@ var WayFinder = function() {
 		}
 
 		return node;
+		*/
 	}
 
 	/**
@@ -138,10 +150,12 @@ var WayFinder = function() {
 	function createPath(path) {
 		var edge = prepPath(path);
 		//console.log(JSON.stringify(edge));	
+		//
 		$.ajax({
 			type: "POST",
 			url: "/createpath/",
-			data: JSON.stringify(edge),
+			//data: JSON.stringify(edge),
+			data: $.param(edge),
 			success: function(result) {
 				console.log(result);
 			}
@@ -158,6 +172,8 @@ var WayFinder = function() {
 		var node1 = mapPath.getAt(0);
 		var node2 = mapPath.getAt(1);
 
+		//var lat = marker.getPosition().lat();
+		/*
 		var pathNode = {
 			node1: [
 				node1.lat(),
@@ -169,6 +185,12 @@ var WayFinder = function() {
 				node2.lng()
 			]
 		};
+		*/
+
+		var pathNode = {
+			node1: node1.toUrlValue(6),
+			node2: node2.toUrlValue(6),
+		}
 		return pathNode;
 	}
 
@@ -177,20 +199,20 @@ var WayFinder = function() {
 	 */
 	function addMarkerListeners(marker) {
 		// Delete node
-		google.maps.event.addListener(marker, "rightclick", function() {
+		google.maps.event.addListener(marker, "dragstart", function() {
 			deleteNode(this);
 		});
 
 		// Add marker label
-		google.maps.event.addListener(marker, "dblclick", function() {
+		google.maps.event.addListener(marker, "rightclick", function() {
 			var label = prompt("Enter a location name");
 			marker.labelContent = label;
-			marker.setMap(map);
 			updateNode(marker);
 		});
 
 		// Add to node to path
 		google.maps.event.addListener(marker, "click", function() {
+			console.log('pathcreate fired');
 			pair.push(this);
 
 			if (pair.getLength() === 2) {
@@ -203,11 +225,18 @@ var WayFinder = function() {
 	 * addPathListeners
 	 */
 	function addPathListeners(path) {
-		// Delete path
+		/*
 		google.maps.event.addListener(path, "rightclick", function() {
 			var path = prepPath(this);
 			deletePath(path);
 		});
+
+		// Delete path
+		google.maps.event.addListener(path, "remove_at", function() {
+			console.log('fired');
+			this.setMap(null);
+		});
+		*/
 	}
 
 	/**
@@ -259,15 +288,14 @@ var WayFinder = function() {
 
 	/**
 	 * mapListeners
-	 * Starts when DOM is loaded
 	 */
-	(function mapListeners() {
+	function mapListeners() {
 		google.maps.event.addListener(map, "click", function(event) {
 			markerOptions.position = event.latLng;
         	var marker = new MarkerWithLabel(markerOptions);
 			startPath(marker, false);
 		});
-	})();
+	}
 
 	/**
 	 * startPath
@@ -311,8 +339,11 @@ var WayFinder = function() {
 			pair.clear();
 		} else {
 			segment.setMap(map);
-			//paths.push(segment);
-			createPath(segment);
+
+			// Delay the DB write for a litte bit
+			setTimeout(function() {
+				createPath(segment);
+			},500);
 			//addPathListeners(segment);
 			pair.clear();
 		}
@@ -476,15 +507,8 @@ var WayFinder = function() {
 		$("#toolbar-admin").button().click(function() {
 			window.location = "/admin";
 		});
-
 		
 		$("#toolbar-useraccess").buttonset();
-
-		/*
-		$("#toolbar-path").button({
-			icons: { primary: "ui-icon-pencil" }
-		}).click(startPath);
-		*/
 
 		$("#toolbar-clear").button({
 			icons: { primary: "ui-icon-bookmark" }
@@ -502,8 +526,24 @@ var WayFinder = function() {
 	 * Bring everything together
 	 */
 	function initialize() {
-		loadNodes();
-		loadPaths();
+
+		// Check if user is authenticated and has permissions to edit the map
+		(function checkAuth() {
+			$.ajax({
+				type: "GET",
+				url: "/userauth/",
+				statusCode: {
+					403: function() {
+						console.log('action not permitted');
+					}
+				},
+				success: function(result) {
+					mapListeners();
+					loadNodes();
+					loadPaths();
+				}
+			});
+		})();
 
 		// Place CSRF header before any ajax request is sent, required for django POST (unless view is csrf_exempt)
 		$.ajaxSetup({

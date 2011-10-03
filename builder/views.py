@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.utils import simplejson as json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import UserCreationForm
@@ -11,7 +11,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.core import serializers
 from wayfinder.builder.models import Nodes, Paths
-from decimal import Decimal
 from django import forms
 import urllib
 
@@ -26,121 +25,145 @@ def user_from_session_key(session_key):
     else:
       return AnonymousUser()
 
+def user_in_group(user, group):
+	in_group = user.groups.filter(name='{0}'.format(group)).count()
+	if in_group == 0:
+		return False
+	else:
+		return True
+
+def user_authenticated(request):
+	if request.method == 'GET':
+		if request.user.is_authenticated():
+			return HttpResponse('is')
+		else:
+			return HttpResponseForbidden()
+
 # Must render template with the correct RequestContext for access to user auth data
 def builder(request):
 	return render_to_response('builder.html', context_instance=RequestContext(request))
 
 def load_nodes(request):
-	jsondata = serializers.serialize('json', Nodes.objects.all(), fields=('lat','lng','label'))
-	return HttpResponse(json.dumps(jsondata), mimetype='application/json')
+	if request.user.is_authenticated() and request.user.has_perm('builder.nodes.can_add'):
+		jsondata = serializers.serialize('json', Nodes.objects.all(), fields=('lat','lng','label'))
+		return HttpResponse(json.dumps(jsondata), mimetype='application/json')
+	else:
+		return HttpResponseForbidden()
 
 @csrf_exempt
 def update_node(request):
-	node = json.loads(request.raw_post_data)
-	n = Nodes.objects.filter(lat=node.get('lat'), lng=node.get('lng'))
+	if request.user.is_authenticated() and request.user.has_perm('builder.nodes.can_add'):
+		if request.method == 'POST':
+		#node = json.loads(request.raw_post_data)
+			coords = request.POST.get('coords')	
+			lat = coords.split(',')[0]
+			lng = coords.split(',')[1]
+			#n = Nodes.objects.filter(lat=node.get('lat'), lng=node.get('lng'))
+			n = Nodes.objects.filter(lat=lat, lng=lng)
 
-	if not n:
-		n = Nodes(
-			lat = node.get('lat'),
-			lng = node.get('lng'),
-			label = node.get('label'),
-		)
-		n.save()
-		return HttpResponse('node created')
+			if not n:
+				n = Nodes(
+					#lat = node.get('lat'),
+					#lng = node.get('lng'),
+					#label = node.get('label'),
+					lat = lat,
+					lng = lng,
+					label = request.POST.get('label')
+				)
+				n.save()
+				return HttpResponse('node created')
 
+			else:
+				d = {}
+				d['label'] = request.POST.get('label')
+				# Update model with kwargs expansion
+				n.update(**d)
+
+			return HttpResponse('node updated')
 	else:
-		d = {}
-		d['label'] = node.get('label')
-		# Update model with kwargs expansion
-		n.update(**d)
-
-	return HttpResponse('node updated')
+		return HttpResponseForbidden()
 
 @csrf_exempt
 def delete_node(request):
-	node = json.loads(request.raw_post_data)
-	n = Nodes.objects.filter(lat=node.get('lat'), lng=node.get('lng'))
-	n.delete()
-	return HttpResponse('node deleted')
+	if request.user.is_authenticated() and request.user.has_perm('builder.nodes.can_delete'):
+		if request.method == 'POST':
+			coords = request.POST.get('coords')
+			lat = coords.split(',')[0]
+			lng = coords.split(',')[1]
+			#node = json.loads(request.raw_post_data)
+			#n = Nodes.objects.filter(lat=node.get('lat'), lng=node.get('lng'))
+			n = Nodes.objects.filter(lat=lat, lng=lng)
+			n.delete()
+			return HttpResponse('node deleted')
+	else:
+		return HttpResponseForbidden()
 
 @csrf_exempt
 def clear_map(request):
-	p = Paths.objects.all()
-	p.delete()
-	n = Nodes.objects.all()
-	n.delete()
+	perm_list = ['builder.nodes.can_delete', 'builder.paths.can_delete']
+	if request.user.is_authenticated() and request.user.has_perms(perm_list):
+		p = Paths.objects.all()
+		p.delete()
+		n = Nodes.objects.all()
+		n.delete()
 
-	return HttpResponse('map cleared')
+		return HttpResponse('map cleared')
+	else:
+		return HttpResponseForbidden()
 
 @csrf_exempt
 def create_node(request):
-	node = json.loads(request.raw_post_data)
+	if request.user.is_authenticated() and request.user.has_perm('builder.nodes.can_add'):
+		if request.method == 'POST':
+			coords = request.POST.get('coords')
+			lat = coords.split(',')[0]
+			lng = coords.split(',')[1]
 
-	label = node.get('label')
-	if label == "":
-		label = None
+			n = Nodes(
+				lat = lat,
+				lng = lng
+			)
 
-	n = Nodes(
-		lat = node.get('lat'),
-		lng = node.get('lng'),
-		label = label,
-	)
-
-	n.save()
-
-	return HttpResponse('node created')
-
-
-@csrf_exempt
-def delete_path(request):
-	path = json.loads(request.raw_post_data)
-
-	pathNode1 = path.get('node1')
-	pathNode2 = path.get('node2')
-
-	node1 = Nodes.objects.get(lat=pathNode1[0], lng=pathNode1[1])	
-	node2 = Nodes.objects.get(lat=pathNode2[0], lng=pathNode2[1])	
-
-	p = Paths.objects.filter(node1=node1, node2=node2)
-
-	p.delete()
-	node1.delete()
-	node2.delete()
-
-	return HttpResponse('path deleted')
-	#return HttpResponse("node1: {0} node2: {1}".format(node1, node2))
-	#return HttpResponse(json.dumps(pathNode1), mimetype='application/json')
+			n.save()
+			return HttpResponse('node created')
+	else:
+		return HttpResponseForbidden()
 
 @csrf_exempt
 def load_paths(request):
-	jsondata = serializers.serialize('json', Paths.objects.all(), use_natural_keys=True)
-	return HttpResponse(json.dumps(jsondata), mimetype='application/json')
+	if request.user.is_authenticated() and request.user.has_perm('builder.paths.can_add'):
+		jsondata = serializers.serialize('json', Paths.objects.all(), use_natural_keys=True)
+		return HttpResponse(json.dumps(jsondata), mimetype='application/json')
+	else:
+		return HttpResponseForbidden()
 
 @csrf_exempt
 def create_path(request):
-	path = json.loads(request.raw_post_data)
+	if request.user.is_authenticated() and request.user.has_perm('builder.paths.can_add'):
+		if request.method == 'POST':
+			pathNode1 = request.POST.get('node1')
+			pathNode2 = request.POST.get('node2')
 
-	pathNode1 = path.get('node1')
-	pathNode2 = path.get('node2')
+			node1 = Nodes.objects.get(lat=pathNode1.split(',')[0], lng=pathNode1.split(',')[1])	
+			node2 = Nodes.objects.get(lat=pathNode2.split(',')[0], lng=pathNode2.split(',')[1])	
 
-	node1 = Nodes.objects.get(lat=pathNode1[0], lng=pathNode1[1])	
-	node2 = Nodes.objects.get(lat=pathNode2[0], lng=pathNode2[1])	
+			p = Paths(
+				node1 = node1,
+				node2 = node2
+			)
 
-	p = Paths(
-		node1 = node1,
-		node2 = node2
-	)
-
-	p.save()
-
-	return HttpResponse('path created')
+			p.save()
+			return HttpResponse("node1: {0} node2: {1}".format(node1, node2))
+	else:
+		return HttpResponseForbidden()
 
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             new_user = form.save()
-            return HttpResponseRedirect('/builder/')
+            #return HttpResponseRedirect('/builder/')
+            return HttpResponse('success')
     else:
         form = UserCreationForm()
     return render_to_response('registration/register.html', {
