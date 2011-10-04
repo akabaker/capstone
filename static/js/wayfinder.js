@@ -30,19 +30,36 @@ var WayFinder = function() {
 	}
 
 	/**
+	 * createLogWindw
+	 * Create log-display if it doesn't exist
+	 */
+	function createLogWindow() {
+		if ($("#log-display").length == 0) {
+			$("header h1").after("<div id='log-display'></div>");
+			$("#log-display").addClass("ui-corner-all log-display-rules");
+		}
+	}
+
+	/**
 	 * deleteNode
 	 * Delete node from database
 	 */
 	function deleteNode(marker) {
 		node = prepNode(marker);
+		createLogWindow();
 
 		$.ajax({
 			type: "POST",
 			url: "/deletenode/",
 			//data: JSON.stringify(node),
 			data: $.param(node),
+			statusCode: {
+				403: function() {
+					$("#log-display").html("<span>Action not permitted</span>");
+				}
+			},
 			success: function(result) {
-				console.log(result);
+				$("#log-display").html("<span>Node deleted at " + node.coords + "</span>");
 				marker.setMap(null);
 			}
 		});
@@ -61,7 +78,8 @@ var WayFinder = function() {
 			//data: JSON.stringify(node),
 			data: $.param(node),
 			success: function(result) {
-				console.log(result)
+				createLogWindow();
+				$("#log-display").html("<span>Node created at " + node.coords + "</span>");
 			}
 		});
 	}
@@ -80,6 +98,7 @@ var WayFinder = function() {
 			data: $.param(node),
 			success: function(result) {
 				marker.setMap(map);
+				$("#log-display").html("<span>Destination " + node.label + " saved" +"</span>").fadeIn("slow");
 			}
 		});
 	}
@@ -534,7 +553,8 @@ var WayFinder = function() {
 				url: "/userauth/",
 				statusCode: {
 					403: function() {
-						console.log('action not permitted');
+						createLogWindow();
+						$("#log-display").html("<span>Log in to edit map</span>");
 					}
 				},
 				success: function(result) {
