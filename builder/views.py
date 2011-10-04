@@ -46,7 +46,8 @@ def builder(request):
 def label_list(request):
 	if request.user.is_authenticated():
 		if request.method == 'GET':
-			labels = Nodes.objects.filter(label__isnull=False).order_by('label')
+			term = request.GET.get('term')
+			labels = Nodes.objects.filter(label__isnull=False, label__icontains=term).order_by('label')
 			label_list = []
 			for label in labels:
 				label_list.append(label.label)
