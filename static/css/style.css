@@ -63,7 +63,6 @@ body {
 	border: 1px solid #DDDDDD;
 	padding-bottom: 25px;
 	background: #F5F5F5;
-	height: 300px;
 	/*
 	overflow: auto;
 	-webkit-box-shadow: 0px 0px 3px 0px #8a888a;
@@ -137,8 +136,12 @@ body {
 }
 
 #toolbar-destlist {
-	height: 200px;
+	height: 300px;
 	overflow: auto;
+}
+
+#toolbar-destlist ul:hover {
+	cursor: pointer;
 }
 
 #toolbar-destlist ul, #toolbar-destlist li {

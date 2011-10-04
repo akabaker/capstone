@@ -466,7 +466,20 @@ var WayFinder = function() {
 			type: "GET",
 			url: "/destlist/",
 			success: function(result) {
-				$("#toolbar-destlist").html(result);
+				$("#toolbar-destlist").html(result).find("ul")
+				.click(function() {
+					var lat = $(this).find("li:nth-child(2)").text();
+					var lng = $(this).find("li:nth-child(3)").text();
+					var latlng = new google.maps.LatLng(lat, lng);
+					map.panTo(latlng);
+				})
+				.mouseover(function() {
+					$(this).addClass("ui-state-active")
+				})
+				.mouseout(function() {
+					$(this).removeClass("ui-state-active")
+				});
+
 			}
 		});
 	}
