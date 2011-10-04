@@ -52,9 +52,16 @@ body {
 }
 
 .log-display-rules {
-	background-color: red;
 	font-size: 0.8em;
 	padding: 5px;
+	background: #356aa0;
+	background: -moz-linear-gradient(top, #356aa0 0%, #356aa0 100%);
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#356aa0), color-stop(100%,#356aa0));
+	background: -webkit-linear-gradient(top, #356aa0 0%,#356aa0 100%);
+	background: -o-linear-gradient(top, #356aa0 0%,#356aa0 100%);
+	background: -ms-linear-gradient(top, #356aa0 0%,#356aa0 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#356aa0', endColorstr='#356aa0',GradientType=0 );
+	background: linear-gradient(top, #356aa0 0%,#356aa0 100%);
 }
 
 #nav {

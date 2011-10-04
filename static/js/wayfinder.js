@@ -171,7 +171,7 @@ var WayFinder = function() {
 			url: "/createpath/",
 			data: $.param(edge),
 			success: function(result) {
-				console.log(result);
+				$("#log-display").html("<span>Path created</span>");
 			}
 		});
 	}
