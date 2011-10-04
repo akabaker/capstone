@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, include, url
 from django.views.generic.simple import direct_to_template
-from wayfinder.builder.views import builder, register, create_node, load_nodes, update_node, clear_map, create_path, load_paths, delete_node, user_authenticated
+from wayfinder.builder.views import builder, register, create_node, load_nodes, update_node, clear_map, create_path, load_paths, delete_node, user_authenticated, dest_list
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()
@@ -19,6 +19,7 @@ urlpatterns = patterns('',
 	(r'^clearmap/$', clear_map),
 	(r'^createpath/$', create_path),
 	(r'^loadpaths/$', load_paths),
+	(r'^destlist/$', dest_list),
 	(r'^userauth/$', user_authenticated),
 	(r'^accounts/login/$', 'django.contrib.auth.views.login'),
 	(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/builder'}),

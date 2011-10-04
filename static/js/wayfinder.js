@@ -51,7 +51,6 @@ var WayFinder = function() {
 		$.ajax({
 			type: "POST",
 			url: "/deletenode/",
-			//data: JSON.stringify(node),
 			data: $.param(node),
 			statusCode: {
 				403: function() {
@@ -61,6 +60,7 @@ var WayFinder = function() {
 			success: function(result) {
 				$("#log-display").html("<span>Node deleted at " + node.coords + "</span>");
 				marker.setMap(null);
+				destList();
 			}
 		});
 	}
@@ -75,8 +75,12 @@ var WayFinder = function() {
 		$.ajax({
 			type: "POST",
 			url: "/createnode/",
-			//data: JSON.stringify(node),
 			data: $.param(node),
+			statusCode: {
+				403: function() {
+					$("#log-display").html("<span>Action not permitted</span>");
+				}
+			},
 			success: function(result) {
 				createLogWindow();
 				$("#log-display").html("<span>Node created at " + node.coords + "</span>");
@@ -94,11 +98,16 @@ var WayFinder = function() {
 		$.ajax({
 			type: "POST",
 			url: "/updatenode/",
-			//data: JSON.stringify(node),
 			data: $.param(node),
+			statusCode: {
+				403: function() {
+					$("#log-display").html("<span>Action not permitted</span>");
+				}
+			},
 			success: function(result) {
 				marker.setMap(map);
-				$("#log-display").html("<span>Destination " + node.label + " saved" +"</span>").fadeIn("slow");
+				$("#log-display").html("<span>Destination " + node.label + " saved" +"</span>");
+				destList();
 			}
 		});
 	}
@@ -108,10 +117,9 @@ var WayFinder = function() {
 	 * Return object containing relevant node values
 	 */
 	function prepNode(marker) {
-		var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : "";
+		//var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : "";
+		var label = marker.labelContent;
 		var coords = marker.getPosition().toUrlValue(6);
-		//var lat = marker.getPosition().lat();
-		//var lng = marker.getPosition().lng();
 		
 		node = {
 			coords: coords,	
@@ -119,16 +127,6 @@ var WayFinder = function() {
 		}
 
 		return node;
-
-		/*
-		node = {
-			lat: lat,
-			lng: lng,
-			label: label
-		}
-
-		return node;
-		*/
 	}
 
 	/**
@@ -156,7 +154,6 @@ var WayFinder = function() {
 					});
 
 					segment.setMap(map);
-					//addPathListeners(segment);
 				}
 			}
 		});
@@ -168,12 +165,10 @@ var WayFinder = function() {
 	 */
 	function createPath(path) {
 		var edge = prepPath(path);
-		//console.log(JSON.stringify(edge));	
-		//
+
 		$.ajax({
 			type: "POST",
 			url: "/createpath/",
-			//data: JSON.stringify(edge),
 			data: $.param(edge),
 			success: function(result) {
 				console.log(result);
@@ -190,21 +185,6 @@ var WayFinder = function() {
 		var mapPath = path.getPath();
 		var node1 = mapPath.getAt(0);
 		var node2 = mapPath.getAt(1);
-
-		//var lat = marker.getPosition().lat();
-		/*
-		var pathNode = {
-			node1: [
-				node1.lat(),
-				node1.lng()
-			],
-
-			node2: [
-				node2.lat(),
-				node2.lng()
-			]
-		};
-		*/
 
 		var pathNode = {
 			node1: node1.toUrlValue(6),
@@ -225,7 +205,11 @@ var WayFinder = function() {
 		// Add marker label
 		google.maps.event.addListener(marker, "rightclick", function() {
 			var label = prompt("Enter a location name");
-			marker.labelContent = label;
+			if (label === "") {
+				marker.labelContent = "";
+			} else {
+				marker.labelContent = label;
+			}
 			updateNode(marker);
 		});
 
@@ -238,24 +222,6 @@ var WayFinder = function() {
 				pathComplete();
 			}
 		});
-	}
-
-	/**
-	 * addPathListeners
-	 */
-	function addPathListeners(path) {
-		/*
-		google.maps.event.addListener(path, "rightclick", function() {
-			var path = prepPath(this);
-			deletePath(path);
-		});
-
-		// Delete path
-		google.maps.event.addListener(path, "remove_at", function() {
-			console.log('fired');
-			this.setMap(null);
-		});
-		*/
 	}
 
 	/**
@@ -292,14 +258,24 @@ var WayFinder = function() {
 						var latLng = new google.maps.LatLng(nodes[i].fields.lat, nodes[i].fields.lng);
 						markerOptions.position = latLng;
 
+						if (nodes[i].fields.label == null) {
+							markerOptions.labelContent = undefined;
+						} else {
+							//marker.labelContent = nodes[i].fields.label;
+							markerOptions.labelContent = nodes[i].fields.label;
+						}
+
 						var marker = new MarkerWithLabel(markerOptions);
-						marker.labelContent = nodes[i].fields.label;
+
+						// Set the label back to an emtpy string
+						markerOptions.labelContent = "";
 
 						// Place marker and re-add listeners
 						startPath(marker, true);
 					}
 				} else {
-					console.log('no previous nodes');
+					createLogWindow();
+					$("#log-display").html("<span>No saved nodes</span>");
 				}
 			}
 		});
@@ -395,7 +371,6 @@ var WayFinder = function() {
 	(function modalForms() {
 		/**
 		 * Login modal form
-		 *
 		 * The open function sets up the focus and keypress listeners for great success.
 		 */
 		$("#login-dialog").dialog({
@@ -483,16 +458,23 @@ var WayFinder = function() {
 		});
 	})();
 
+	/**
+	 * destList
+	 */
 	function destList() {
 		$.ajax({
 			type: "GET",
 			url: "/destlist/",
 			success: function(result) {
-				$("#toolbar-destlist").append(result);
+				$("#toolbar-destlist").html(result);
 			}
 		});
 	}
 
+	/**
+	 * clearMap
+	 * Delete map paths and nodes
+	 */
 	function clearMap() {
 		var clearOk = confirm("Are you sure?");
 
@@ -561,6 +543,7 @@ var WayFinder = function() {
 					mapListeners();
 					loadNodes();
 					loadPaths();
+					destList();
 				}
 			});
 		})();

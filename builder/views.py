@@ -43,6 +43,12 @@ def user_authenticated(request):
 def builder(request):
 	return render_to_response('builder.html', context_instance=RequestContext(request))
 
+def dest_list(request):
+	if request.user.is_authenticated():
+		if request.method == 'GET':
+			dest_list = Nodes.objects.filter(label__isnull=False)
+			return render_to_response('destlist.html', {'nodes': dest_list})
+
 def load_nodes(request):
 	if request.user.is_authenticated() and request.user.has_perm('builder.nodes.can_add'):
 		jsondata = serializers.serialize('json', Nodes.objects.all(), fields=('lat','lng','label'))
@@ -54,18 +60,18 @@ def load_nodes(request):
 def update_node(request):
 	if request.user.is_authenticated() and request.user.has_perm('builder.nodes.can_add'):
 		if request.method == 'POST':
-		#node = json.loads(request.raw_post_data)
 			coords = request.POST.get('coords')	
 			lat = coords.split(',')[0]
 			lng = coords.split(',')[1]
-			#n = Nodes.objects.filter(lat=node.get('lat'), lng=node.get('lng'))
+			if request.POST.get('label') == "":
+				label = None
+			else:
+				label = request.POST.get('label')
+
 			n = Nodes.objects.filter(lat=lat, lng=lng)
 
 			if not n:
 				n = Nodes(
-					#lat = node.get('lat'),
-					#lng = node.get('lng'),
-					#label = node.get('label'),
 					lat = lat,
 					lng = lng,
 					label = request.POST.get('label')
@@ -75,7 +81,8 @@ def update_node(request):
 
 			else:
 				d = {}
-				d['label'] = request.POST.get('label')
+				#d['label'] = request.POST.get('label')
+				d['label'] = label
 				# Update model with kwargs expansion
 				n.update(**d)
 
@@ -90,8 +97,6 @@ def delete_node(request):
 			coords = request.POST.get('coords')
 			lat = coords.split(',')[0]
 			lng = coords.split(',')[1]
-			#node = json.loads(request.raw_post_data)
-			#n = Nodes.objects.filter(lat=node.get('lat'), lng=node.get('lng'))
 			n = Nodes.objects.filter(lat=lat, lng=lng)
 			n.delete()
 			return HttpResponse('node deleted')
@@ -162,8 +167,7 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             new_user = form.save()
-            #return HttpResponseRedirect('/builder/')
-            return HttpResponse('success')
+            return HttpResponseRedirect('/builder/')
     else:
         form = UserCreationForm()
     return render_to_response('registration/register.html', {
