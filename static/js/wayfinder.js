@@ -521,6 +521,9 @@ var WayFinder = function() {
 		$("#toolbar-admin").button().click(function() {
 			window.location = "/admin";
 		});
+
+		$("#toolbar-run").button().click(function() {
+		});
 		
 		$("#toolbar-useraccess").buttonset();
 
@@ -532,6 +535,18 @@ var WayFinder = function() {
 			icons: { primary: "ui-icon-search" } 
 		}).click(function() {
 			geoCode($("#geocode-address").val());
+		});
+	})();
+
+	(function autoComplete() {
+		$("#start").autocomplete({
+			source: "/labellist",
+			minLength: 2
+		});
+
+		$("#end").autocomplete({
+			source: "/labellist",
+			minLength: 2
 		});
 	})();
 

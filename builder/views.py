@@ -43,11 +43,26 @@ def user_authenticated(request):
 def builder(request):
 	return render_to_response('builder.html', context_instance=RequestContext(request))
 
+def label_list(request):
+	if request.user.is_authenticated():
+		if request.method == 'GET':
+			labels = Nodes.objects.filter(label__isnull=False).order_by('label')
+			label_list = []
+			for label in labels:
+				label_list.append(label.label)
+
+			return HttpResponse(json.dumps(label_list), mimetype='application/json')
+
 def dest_list(request):
 	if request.user.is_authenticated():
 		if request.method == 'GET':
 			dest_list = Nodes.objects.filter(label__isnull=False).order_by('label')
 			return render_to_response('destlist.html', {'nodes': dest_list})
+		
+		if request.method == 'POST':
+			jsondata = serializers.serialize('json', Nodes.objects.filter(label__isnull=False).order_by('label'), fields=('lat','lng','label'))
+			return HttpResponse(json.dumps(jsondata), mimetype='application/json')
+
 
 def load_nodes(request):
 	if request.user.is_authenticated() and request.user.has_perm('builder.nodes.can_add'):
