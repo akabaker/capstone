@@ -46,7 +46,7 @@ def builder(request):
 def dest_list(request):
 	if request.user.is_authenticated():
 		if request.method == 'GET':
-			dest_list = Nodes.objects.filter(label__isnull=False)
+			dest_list = Nodes.objects.filter(label__isnull=False).order_by('label')
 			return render_to_response('destlist.html', {'nodes': dest_list})
 
 def load_nodes(request):

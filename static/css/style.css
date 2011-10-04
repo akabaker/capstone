@@ -63,7 +63,9 @@ body {
 	border: 1px solid #DDDDDD;
 	padding-bottom: 25px;
 	background: #F5F5F5;
+	height: 300px;
 	/*
+	overflow: auto;
 	-webkit-box-shadow: 0px 0px 3px 0px #8a888a;
 	-moz-box-shadow: 0px 0px 3px 0px #8a888a;
 	box-shadow: 0px 0px 3px 0px #8a888a;
@@ -134,9 +136,17 @@ body {
 	clear: both;
 }
 
-#toolbar-maplist ul, #toolbar-maplist li{
-	padding: 2px;
+#toolbar-destlist {
+	height: 200px;
+	overflow: auto;
+}
+
+#toolbar-destlist ul, #toolbar-destlist li {
 	margin: 2px;
+}
+
+#toolbar-destlist ul li:first-child {
+	font-weight: bold;
 }
 
 /* End Toolbar */
