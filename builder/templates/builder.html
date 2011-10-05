@@ -20,11 +20,12 @@
 			<h5 class="toolbarheader">Map Utilities</h5>
 			<button id="toolbar-clear">Clear Map</button>
 	
+			{% include 'findpathform.html' %}
+
 			<h5 class="toolbarheader">Destinations</h5>
 			<div id="toolbar-destlist">
 			</div>
 
-			{% include 'findpathform.html' %}
 		{% else %}
 			<p class="notification">Log in to get started</p>
 		{% endif %}

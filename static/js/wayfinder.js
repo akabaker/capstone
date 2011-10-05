@@ -524,7 +524,16 @@ var WayFinder = function() {
 
 		$("#toolbar-run").button().click(function() {
 			var data = $("#toolbar-findpath").serialize();
-			console.log(data);
+
+			$.ajax({
+				type: "POST",
+				url: "/findpath/",
+				data: data,
+				success: function(result) {
+					console.log(result);
+				}
+			});
+
 			return false;
 		});
 		
@@ -543,12 +552,12 @@ var WayFinder = function() {
 
 	(function autoComplete() {
 		$("#start").autocomplete({
-			source: "/labellist",
+			source: "/labellist/",
 			minLength: 2
 		});
 
 		$("#end").autocomplete({
-			source: "/labellist",
+			source: "/labellist/",
 			minLength: 2
 		});
 	})();
