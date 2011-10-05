@@ -1,0 +1,18 @@
+<h5 class="toolbarheader">Test Pathing</h5>
+{% if form.errors %}
+	<p style="color: red;">
+		Please correct the error{{ form.errors|pluralize }} below.
+	</p>
+{% endif %}
+
+<form action="" id="toolbar-findpath" method="post">
+	<div class="field">
+		<label for="id_start">Start:</label>
+		<input type="text" name="start" maxlength="100" id="start" />
+	</div>
+	<div class="field">
+		<label for="id_stop">End:</label>
+		<input type="text" name="end" maxlength="100" id="end" />
+	</div>
+	<input type="submit" id="toolbar-run" value="Run" />
+</form>

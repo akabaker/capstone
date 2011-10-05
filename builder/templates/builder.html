@@ -5,12 +5,6 @@
 {% endblock %}
 
 {% block aside %}
-	<!--
-	<div id="toolbar-radios" class="toolbar">
-		<h5 class="toolbarheader">Start/End Points</h5>
-		<input type="radio" id="toolbar-endpoints" name="tool" /><label for="toolbar-endpoints">Place End Points</label>
-	</div>
-	-->
 	<div class="toolbar">
 		<div id="toolbar-useraccess">
 		{% if user.is_authenticated %}
@@ -24,35 +18,18 @@
 		<div id="toolbar-buttons" class="toolbar">
 		{% if user.is_authenticated %}
 			<h5 class="toolbarheader">Map Utilities</h5>
-			<!--<button id="toolbar-path">Start Editing</button>-->
 			<button id="toolbar-clear">Clear Map</button>
-			<!--<button id="toolbar-newmap">New Map</button>-->
+	
+			<h5 class="toolbarheader">Destinations</h5>
+			<div id="toolbar-destlist">
+			</div>
+
+			{% include 'findpathform.html' %}
 		{% else %}
 			<p class="notification">Log in to get started</p>
 		{% endif %}
 		</div>
-
-		<div id="toolbar-destlist">
-		</div>
-
-		<h5 class="toolbarheader">Test Pathing</h5>
-		<div id="toolbar-testpath">
-			<div class="ui-widget">
-				<label for="start">Start </label>
-				<input id="start" />
-				<label for="end">End </label>
-				<input id="end" />
-				<button id="toolbar-run">Run</button>
-			</div>	
-		</div>
 	</div>
-	<!--
-	<div id="toolbar-utilities" class="toolbar">
-		<h5 class="toolbarheader">Utilities</h5>
-		<button id="toolbar-route">Route</button>
-		<button id="toolbar-save">Save Map</button>
-	</div>
-	-->
 {% endblock aside %}
 
 {% block main-content %}

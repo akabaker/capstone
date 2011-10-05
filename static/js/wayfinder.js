@@ -523,6 +523,9 @@ var WayFinder = function() {
 		});
 
 		$("#toolbar-run").button().click(function() {
+			var data = $("#toolbar-findpath").serialize();
+			console.log(data);
+			return false;
 		});
 		
 		$("#toolbar-useraccess").buttonset();

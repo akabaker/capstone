@@ -7,3 +7,7 @@ class NewMap(forms.Form):
 	bounds_sw_lng = forms.DecimalField(widget=forms.HiddenInput)
 	bounds_ne_lat = forms.DecimalField(widget=forms.HiddenInput)
 	bounds_ne_lng = forms.DecimalField(widget=forms.HiddenInput)
+
+class FindPath(forms.Form):
+	start = forms.CharField(max_length=100)
+	end = forms.CharField(max_length=100)

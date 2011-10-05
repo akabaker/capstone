@@ -11,6 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AnonymousUser
 from django.core import serializers
 from wayfinder.builder.models import Nodes, Paths
+from wayfinder.builder.forms import FindPath
 from django import forms
 import urllib
 
@@ -59,11 +60,6 @@ def dest_list(request):
 		if request.method == 'GET':
 			dest_list = Nodes.objects.filter(label__isnull=False).order_by('label')
 			return render_to_response('destlist.html', {'nodes': dest_list})
-		
-		if request.method == 'POST':
-			jsondata = serializers.serialize('json', Nodes.objects.filter(label__isnull=False).order_by('label'), fields=('lat','lng','label'))
-			return HttpResponse(json.dumps(jsondata), mimetype='application/json')
-
 
 def load_nodes(request):
 	if request.user.is_authenticated() and request.user.has_perm('builder.nodes.can_add'):
@@ -189,3 +185,12 @@ def register(request):
     return render_to_response('registration/register.html', {
         'form': form,
     })
+
+def find_path(request):
+	if request.method == 'POST':
+		form = FindPath(request.POST)
+		if form.is_valid():
+			cd = form.cleaned_data
+			return HttpResponse(cd)
+	else:
+		HttpResponseForbidden()
