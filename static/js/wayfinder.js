@@ -30,7 +30,7 @@ var WayFinder = function() {
 	}
 
 	/**
-	 * createLogWindw
+	 * createLogWindow
 	 * Create log-display if it doesn't exist
 	 */
 	function createLogWindow() {
@@ -102,10 +102,15 @@ var WayFinder = function() {
 			statusCode: {
 				403: function() {
 					$("#log-display").html("<span>Action not permitted</span>");
+				},
+
+				500: function() {
+					$("#log-display").html("<span>Destination already exists</span>");
 				}
 			},
 			success: function(result) {
 				marker.setMap(map);
+				createLogWindow();
 				$("#log-display").html("<span>Destination " + node.label + " saved" +"</span>");
 				destList();
 			}
