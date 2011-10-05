@@ -68,6 +68,9 @@
 			<div id="log-display" class="ui-corner-all">
 			</div>
 			-->
+			{% if user.is_authenticated %}
+				<span id="welcome">Welcome back {{ user.username }}</span>
+			{% endif %}
 			{% endblock header %}
 			<div id="newmap-dialog" title="New Map"></div> <!-- new map modal dialog -->
 			<div id="login-dialog" title="Login"></div> <!-- Login modal dialog -->

@@ -22,6 +22,12 @@ body {
 	width: 200px;
 }
 
+#welcome {
+	font-size: 11px;
+	color: #FF9900;
+	margin-left: 15px;
+}
+
 #container, #main, html {
 	height: 100%;
 }

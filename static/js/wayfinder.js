@@ -574,10 +574,10 @@ var WayFinder = function() {
 		if (startPoint.length == 0) {
 			var marker = new StyledMarker({
 							styleIcon: new StyledIcon(
-								StyledIconTypes.MARKER, {
-									//color:"AED6EC"
-									color:"2d2d2d"
-								}),
+                                StyledIconTypes.BUBBLE, {
+                                        color: "00FF00",
+                                        text: "Start"
+                                }),
 							position: map.getCenter(),
 							map: map,
 							draggable: true
