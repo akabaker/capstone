@@ -182,12 +182,12 @@ def find_path(request):
 		if form.is_valid():
 			cd = form.cleaned_data
 
-			start_node = Nodes.objects.get(label=cd['start'])
+			start = cd['start']
 			end_node = Nodes.objects.get(label=cd['end'])
 	
 			#TODO: magic goes here
 
-			return HttpResponse(str(start_node.lat))
+			return HttpResponse(str(start))
 
 		else:
 			return HttpResponse('invalid')

@@ -7,6 +7,7 @@ var WayFinder = function() {
 	var nodes = new google.maps.MVCArray;
 	var paths = new google.maps.MVCArray;
 	var pair = new google.maps.MVCArray;
+	var startPoint = [];
 	var markerOptions = {
 		map: map,
 		draggable: true,
@@ -220,7 +221,6 @@ var WayFinder = function() {
 
 		// Add to node to path
 		google.maps.event.addListener(marker, "click", function() {
-			console.log('pathcreate fired');
 			pair.push(this);
 
 			if (pair.getLength() === 2) {
@@ -527,6 +527,10 @@ var WayFinder = function() {
 			window.location = "/admin";
 		});
 
+		$("#toolbar-startpoint").button().click(function() {
+			setStartPoint();
+		});
+
 		$("#toolbar-run").button().click(function() {
 			var data = $("#toolbar-findpath").serialize();
 
@@ -541,7 +545,7 @@ var WayFinder = function() {
 
 			return false;
 		});
-		
+
 		$("#toolbar-useraccess").buttonset();
 
 		$("#toolbar-clear").button({
@@ -556,16 +560,39 @@ var WayFinder = function() {
 	})();
 
 	(function autoComplete() {
-		$("#start").autocomplete({
-			source: "/labellist/",
-			minLength: 2
-		});
-
 		$("#end").autocomplete({
 			source: "/labellist/",
 			minLength: 2
 		});
 	})();
+
+	/**
+	 * setStartPoint
+	 * set FindPath start point
+	 */
+	function setStartPoint() {
+		if (startPoint.length == 0) {
+			var marker = new StyledMarker({
+							styleIcon: new StyledIcon(
+								StyledIconTypes.MARKER, {
+									//color:"AED6EC"
+									color:"2d2d2d"
+								}),
+							position: map.getCenter(),
+							map: map,
+							draggable: true
+						});
+
+			startPoint.push(marker);
+			$("#start").val(marker.getPosition().toUrlValue());
+		} else {
+			$("#start").val(startPoint[0].getPosition().toUrlValue());
+		}
+
+		google.maps.event.addListener(startPoint[0], "dragend", function(event) {
+			$("#start").val(this.getPosition().toUrlValue());
+		});
+	}
 
 	/**
 	 * initialize
