@@ -8,10 +8,17 @@ var WayFinder = function() {
 	var paths = new google.maps.MVCArray;
 	var pair = new google.maps.MVCArray;
 	var startPoint = [];
+	var polyLineOptions = {
+		strokeColor: "#FF1717",
+		strokeOpacity: 2.0,
+		strokeWeight: 3
+	};
 	var markerOptions = {
 		map: map,
+		icon: "/static/images/pedestriancrossing.png",
 		draggable: true,
 		raiseOnDrag: false,
+		animation: google.maps.Animation.DROP,
 		labelAnchor: new google.maps.Point(20,0),
 		labelClass: "labels",
 		labelContent: "",
@@ -152,12 +159,8 @@ var WayFinder = function() {
 					path.push(new google.maps.LatLng(paths[i].fields.node1[0], paths[i].fields.node1[1]));
 					path.push(new google.maps.LatLng(paths[i].fields.node2[0], paths[i].fields.node2[1]));
 
-					var segment = new google.maps.Polyline({
-						path: path,
-						strokeColor: "#FF0000",
-						strokeOpacity: 1.0,
-						strokeWeight: 3
-					});
+					polyLineOptions.path = path;
+					var segment = new google.maps.Polyline(polyLineOptions);
 
 					segment.setMap(map);
 				}
@@ -227,6 +230,22 @@ var WayFinder = function() {
 				pathComplete();
 			}
 		});
+
+		google.maps.event.addListener(marker, "mouseover", function() {
+			this.setIcon("/static/images/pedestriancrossing_over.png");
+		});
+
+		google.maps.event.addListener(marker, "mouseout", function() {
+			this.setIcon("/static/images/pedestriancrossing.png");
+		});
+	}
+
+	function toggleBounce(marker) {
+		if (marker.getAnimation() != null) {
+			marker.setAnimation(null);
+		} else {
+			marker.setAnimation(google.maps.Animation.BOUNCE);
+		}
 	}
 
 	/**
@@ -307,7 +326,6 @@ var WayFinder = function() {
 
 		// If marker is new
 		if (!isLoadedMarker) {
-			//nodes.push(marker);
 			pair.push(marker);
 			createNode(marker);
 		
@@ -326,13 +344,9 @@ var WayFinder = function() {
 		pair.forEach(function(elem, index) {
 			path.push(elem.getPosition());
 		});
-
-		var segment = new google.maps.Polyline({
-			path: path,
-			strokeColor: "#FF0000",
-			strokeOpacity: 1.0,
-			strokeWeight: 3
-		});
+		
+		polyLineOptions.path = path;
+		var segment = new google.maps.Polyline(polyLineOptions);
 
 		if (isPathEqual(segment)) {
 			console.log('paths equal');
@@ -344,7 +358,6 @@ var WayFinder = function() {
 			setTimeout(function() {
 				createPath(segment);
 			},500);
-			//addPathListeners(segment);
 			pair.clear();
 		}
 	}
@@ -579,6 +592,7 @@ var WayFinder = function() {
                                         text: "Start"
                                 }),
 							position: map.getCenter(),
+							animation: google.maps.Animation.DROP,
 							map: map,
 							draggable: true
 						});
