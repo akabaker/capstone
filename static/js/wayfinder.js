@@ -695,6 +695,17 @@ var WayFinder = function() {
  * Execute on window ready
  */
 $(function() {
+	$.jGrowl.defaults.closer = false;
+
+	if ( !$.browser.safari ) {
+		$.jGrowl.defaults.animateOpen = {
+			width: 'show'
+		};
+		$.jGrowl.defaults.animateClose = {
+			width: 'hide'
+		};
+	}
+
 	wayfinder = WayFinder();
 	wayfinder.init();	
 });
