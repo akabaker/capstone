@@ -72,29 +72,35 @@ var Map = function() {
 	* @param Number lng The longitude of the geocode location
 	*
 	*/
-	function initialize(lat, lng) {
-
+	function initialize(lat, lng, zoom) {
 		//Default values for MU campus
 		lat = typeof(lat) != 'undefined' ? lat : 38.94617;
 		lng = typeof(lng) != 'undefined' ? lng : -92.32866; 
+		zoom = typeof(zoom) != 'undefined' ? zoom : 18; 
 
 		var center;
 		var mapZoom;
 		var latlng = new google.maps.LatLng(lat, lng);
 
-		if ($.cookie('mapCenter')) {
-			var parsedLatLng = JSON.parse($.cookie('mapCenter'));
+		//if ($.cookie('mapCenter')) {
+		if (localStorage.mapCenter) {
+			//var parsedLatLng = JSON.parse($.cookie('mapCenter'));
+			var parsedLatLng = JSON.parse(localStorage.mapCenter);
+			console.log(JSON.parse(localStorage.mapCenter));
 			center = new google.maps.LatLng(parsedLatLng.lat, parsedLatLng.lng);
 		} else {
 			center = latlng;
 		}
 
-		if ($.cookie('mapZoom')) {
-			mapZoom = JSON.parse($.cookie('mapZoom'));
+		//if ($.cookie('mapZoom')) {
+		if (localStorage.mapZoom) {
+			//mapZoom = JSON.parse($.cookie('mapZoom'));
+			console.log(JSON.parse(localStorage.mapZoom));
+			mapZoom = JSON.parse(localStorage.mapZoom);
 		} else {
-			mapZoom = 18;	
+			mapZoom = zoom;	
 		}
-		
+
 		var myOptions = {
 			zoom: mapZoom,
 			center: center,
@@ -109,12 +115,14 @@ var Map = function() {
 				lng: map.getCenter().lng(),
 			};
 
-			$.cookie('mapCenter', JSON.stringify(mapCenter));
+			//$.cookie('mapCenter', JSON.stringify(mapCenter));
+			localStorage.mapCenter = JSON.stringify(mapCenter);
 		});
 
 		google.maps.event.addListener(map, "zoom_changed", function() {
 			var mapZoom = map.getZoom();
-			$.cookie('mapZoom', JSON.stringify(map.getZoom()));
+			//$.cookie('mapZoom', JSON.stringify(map.getZoom()));
+			localStorage.mapZoom = JSON.stringify(map.getZoom());
 		});
 
 		return map;

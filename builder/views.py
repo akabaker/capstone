@@ -1,6 +1,6 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.http import HttpResponse, HttpResponseForbidden
+from django.http import HttpResponse, HttpResponseForbidden, Http404
 from django.utils import simplejson as json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.forms import UserCreationForm
@@ -51,6 +51,18 @@ def register(request):
     return render_to_response('registration/register.html', {
         'form': form,
     })
+
+def save_or_load_map_state(request):
+	if request.method == 'POST':
+		jsondata = json.loads(request.raw_post_data)
+		request.session['map_state'] = jsondata
+		return HttpResponse(json.dumps(request.session['map_state']))
+	
+	if request.method == 'GET':
+		if "map_state" in request.session:
+			return HttpResponse(json.dumps(request.session['map_state']))
+		else:
+			raise Http404('none')
 
 # Must render template with the correct RequestContext for access to user auth data
 def builder(request):

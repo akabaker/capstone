@@ -24,6 +24,7 @@ urlpatterns = patterns('',
 	(r'^labellist/$', label_list),
 	(r'^findpath/$', find_path),
 	(r'^userauth/$', user_authenticated),
+	(r'^mapstate/$', save_or_load_map_state),
     # Examples:
     # url(r'^$', 'wayfinder.views.home', name='home'),
     # url(r'^wayfinder/', include('wayfinder.foo.urls')),

@@ -54,7 +54,7 @@ var WayFinder = function() {
 	 */
 	function deleteNode(marker) {
 		node = prepNode(marker);
-		createLogWindow();
+		//createLogWindow();
 
 		$.ajax({
 			type: "POST",
@@ -62,11 +62,13 @@ var WayFinder = function() {
 			data: $.param(node),
 			statusCode: {
 				403: function() {
-					$("#log-display").html("<span>Action not permitted</span>");
+					//$("#log-display").html("<span>Action not permitted</span>");
+					$.jGrowl('Action not permitted');
 				}
 			},
 			success: function(result) {
-				$("#log-display").html("<span>Node deleted at " + node.coords + "</span>");
+				//$("#log-display").html("<span>Node deleted at " + node.coords + "</span>");
+				$.jGrowl("Node deleted at " + node.coords);
 				marker.setMap(null);
 				destList();
 			}
@@ -86,12 +88,14 @@ var WayFinder = function() {
 			data: $.param(node),
 			statusCode: {
 				403: function() {
-					$("#log-display").html("<span>Action not permitted</span>");
+					//$("#log-display").html("<span>Action not permitted</span>");
+					$.jGrowl("Action not permitted");
 				}
 			},
 			success: function(result) {
-				createLogWindow();
-				$("#log-display").html("<span>Node created at " + node.coords + "</span>");
+				//createLogWindow();
+				//$("#log-display").html("<span>Node created at " + node.coords + "</span>");
+				$.jGrowl("Node created at " + node.coords);
 			}
 		});
 	}
@@ -109,17 +113,20 @@ var WayFinder = function() {
 			data: $.param(node),
 			statusCode: {
 				403: function() {
-					$("#log-display").html("<span>Action not permitted</span>");
+					//$("#log-display").html("<span>Action not permitted</span>");
+					$.jGrowl("Action not permitted");
 				},
 
 				500: function() {
-					$("#log-display").html("<span>Destination already exists</span>");
+					//$("#log-display").html("<span>Destination already exists</span>");
+					$.jGrowl("Destination already exists");
 				}
 			},
 			success: function(result) {
 				marker.setMap(map);
-				createLogWindow();
-				$("#log-display").html("<span>Destination " + node.label + " saved" +"</span>");
+				//createLogWindow();
+				//$("#log-display").html("<span>Destination " + node.label + " saved" +"</span>");
+				$.jGrowl("Destination " + node.label + " saved");
 				destList();
 			}
 		});
@@ -180,7 +187,8 @@ var WayFinder = function() {
 			url: "/createpath/",
 			data: $.param(edge),
 			success: function(result) {
-				$("#log-display").html("<span>Path created</span>");
+				//$("#log-display").html("<span>Path created</span>");
+				$.jGrowl("Path created");
 			}
 		});
 	}
@@ -298,8 +306,9 @@ var WayFinder = function() {
 						startPath(marker, true);
 					}
 				} else {
-					createLogWindow();
-					$("#log-display").html("<span>No saved nodes</span>");
+					//createLogWindow();
+					//$("#log-display").html("<span>No saved nodes</span>");
+					$.jGrowl("No saved nodes, click on the map to being editing!");
 				}
 			}
 		});
@@ -514,6 +523,8 @@ var WayFinder = function() {
 				type: "POST",
 				url: "/clearmap/",
 				success: function(result) {
+					localStorage.removeItem('mapCenter');
+					localStorage.removeItem('mapZoom');
 					window.location = "/builder";
 				}
 			});
@@ -621,8 +632,9 @@ var WayFinder = function() {
 				url: "/userauth/",
 				statusCode: {
 					403: function() {
-						createLogWindow();
-						$("#log-display").html("<span>Log in to edit map</span>");
+						//createLogWindow();
+						//$("#log-display").html("<span>Log in to edit map</span>");
+						$.jGrowl("Log in to edit map");
 					}
 				},
 				success: function(result) {
@@ -643,6 +655,30 @@ var WayFinder = function() {
 				}
 			}
     	});
+
+    	$("#toolbar-clear").qtip({
+    		content: "Delete all nodes and paths",
+    		position: {
+    			my: "left center",
+    			at: "right center",
+    			target: $("#toolbar-clear")
+			},
+    		style: {
+    			classes: "ui-tooltip-red, ui-tooltip-rounded"
+			}
+		});
+
+    	$("#toolbar-startpoint").qtip({
+    		content: "Place start point for pathfinding test",
+    		position: {
+    			my: "left center",
+    			at: "right center",
+    			target: $("#toolbar-startpoint")
+			},
+    		style: {
+    			classes: "ui-tooltip-red, ui-tooltip-rounded"
+			}
+		});
 	}
 
 	/**

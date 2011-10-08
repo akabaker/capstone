@@ -230,8 +230,15 @@ th {
 }
 
 .labels {
-	color: #2d2d2d;
-	background-color: #efefef;
+	/*color: #2d2d2d;*/
+	color: #FF9900;
+	/*background-color: #efefef;*/
+	background-color: #2d2d2d;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	padding: 4px;
+	text-align: center;
 }
 
 /* End utilities */
