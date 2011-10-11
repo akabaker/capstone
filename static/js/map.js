@@ -86,7 +86,6 @@ var Map = function() {
 		if (localStorage.mapCenter) {
 			//var parsedLatLng = JSON.parse($.cookie('mapCenter'));
 			var parsedLatLng = JSON.parse(localStorage.mapCenter);
-			console.log(JSON.parse(localStorage.mapCenter));
 			center = new google.maps.LatLng(parsedLatLng.lat, parsedLatLng.lng);
 		} else {
 			center = latlng;

@@ -9,9 +9,14 @@ var WayFinder = function() {
 	var pair = new google.maps.MVCArray;
 	var startPoint = [];
 	var polyLineOptions = {
-		strokeColor: "#FF1717",
+		strokeColor: "FF0000",
 		strokeOpacity: 2.0,
 		strokeWeight: 3
+	};
+	var testPolylineOptions = {
+		strokeColor: "#0000FF",
+		strokeOpacity: 2.0,
+		strokeWeight: 4,
 	};
 	var markerOptions = {
 		map: map,
@@ -555,6 +560,8 @@ var WayFinder = function() {
 			setStartPoint();
 		});
 
+		//$("#toolbar-run").button();
+
 		$("#toolbar-run").button().click(function() {
 			var data = $("#toolbar-findpath").serialize();
 
@@ -562,8 +569,25 @@ var WayFinder = function() {
 				type: "POST",
 				url: "/findpath/",
 				data: data,
+				statusCode: {
+					404: function() {
+						alert('Please enter start and end values');
+					},
+					500: function() {
+						alert('Server returned HTTP 500, use Firebug or Chrome JavaScript console for more info.');
+					}
+				},
 				success: function(result) {
-					console.log(result);
+					var path = [];
+
+					for (var i = 0; i < result.length; i++) {
+						var latlng = new google.maps.LatLng(result[i][0], result[i][1]);
+						path.push(latlng);
+					}
+
+					testPolylineOptions.path = path;
+					var testPath = new google.maps.Polyline(testPolylineOptions);
+					testPath.setMap(map);
 				}
 			});
 

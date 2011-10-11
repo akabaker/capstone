@@ -14,6 +14,7 @@ from wayfinder.builder.models import Nodes, Paths
 from wayfinder.builder.forms import FindPath
 from django import forms
 import urllib
+import Pathfind
 
 def user_from_session_key(session_key):
     session_engine = __import__(settings.SESSION_ENGINE, {}, {}, [''])
@@ -194,16 +195,25 @@ def find_path(request):
 		if form.is_valid():
 			cd = form.cleaned_data
 
-			start = {
+			start_node = {
 				'lat': cd['start'].split(',')[0],
 				'lng': cd['start'].split(',')[1]
 			}
 
 			end_node = Nodes.objects.get(label=cd['end'])
 	
-			#TODO: magic goes here
+			#This function call should return the polyline to be drawn
+			start = [float(start_node['lat']), float(start_node['lng'])]
+			end = [end_node.lat, end_node.lng]
+			path = Pathfind.pathFind(start, end)
 
-			return HttpResponse(str(start['lat']))
+			returnedPath = []
+			for p in path:
+				returnedPath.append([p[0],p[1]])
+
+			#Add our starting location to the front of the list
+			returnedPath.insert(0, start)
+			return HttpResponse(json.dumps(returnedPath), mimetype='application/json')
 
 		else:
 			return HttpResponse('invalid')
