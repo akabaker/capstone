@@ -128,6 +128,17 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'TIMEOUT': 60,
+        'LOCATION': '/var/tmp/django_cache',
+        'OPTIONS': {
+        	'MAX_ENTRIES': 1000
+		}
+    }
+}
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error.

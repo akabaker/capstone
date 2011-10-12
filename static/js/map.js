@@ -94,7 +94,6 @@ var Map = function() {
 		//if ($.cookie('mapZoom')) {
 		if (localStorage.mapZoom) {
 			//mapZoom = JSON.parse($.cookie('mapZoom'));
-			console.log(JSON.parse(localStorage.mapZoom));
 			mapZoom = JSON.parse(localStorage.mapZoom);
 		} else {
 			mapZoom = zoom;	

@@ -205,15 +205,18 @@ def find_path(request):
 			#This function call should return the polyline to be drawn
 			start = [float(start_node['lat']), float(start_node['lng'])]
 			end = [end_node.lat, end_node.lng]
-			path = Pathfind.pathFind(start, end)
+			try:
+				path = Pathfind.pathFind(start, end)
+			except RuntimeError:
+				return Http404('Unable to find path')
+			else:
+				returnedPath = []
+				for p in path:
+					returnedPath.append([p[0],p[1]])
 
-			returnedPath = []
-			for p in path:
-				returnedPath.append([p[0],p[1]])
-
-			#Add our starting location to the front of the list
-			returnedPath.insert(0, start)
-			return HttpResponse(json.dumps(returnedPath), mimetype='application/json')
+				#Add our starting location to the front of the list
+				returnedPath.insert(0, start)
+				return HttpResponse(json.dumps(returnedPath), mimetype='application/json')
 
 		else:
 			return HttpResponse('invalid')

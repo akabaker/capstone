@@ -181,6 +181,10 @@ body {
 	font-size: 12px !important;
 	height: 25px;
 }
+
+#toolbar-loading {
+	display: none;
+}
 /* End Toolbar */
 
 /**

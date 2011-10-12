@@ -8,15 +8,17 @@ var WayFinder = function() {
 	var paths = new google.maps.MVCArray;
 	var pair = new google.maps.MVCArray;
 	var startPoint = [];
+	var testPaths = [];
 	var polyLineOptions = {
 		strokeColor: "FF0000",
-		strokeOpacity: 2.0,
+		strokeOpacity: 4.0,
 		strokeWeight: 3
 	};
 	var testPolylineOptions = {
-		strokeColor: "#0000FF",
-		strokeOpacity: 2.0,
+		strokeColor: "#FFE303",
+		strokeOpacity: 1.0,
 		strokeWeight: 4,
+		zIndex: 100
 	};
 	var markerOptions = {
 		map: map,
@@ -28,6 +30,7 @@ var WayFinder = function() {
 		labelClass: "labels",
 		labelContent: "",
 	};
+	var previousPath;
 
 	/**
 	 * geoCode
@@ -560,18 +563,22 @@ var WayFinder = function() {
 			setStartPoint();
 		});
 
-		//$("#toolbar-run").button();
+		$("#toolbar-edit").button();
 
 		$("#toolbar-run").button().click(function() {
 			var data = $("#toolbar-findpath").serialize();
+			
+			$("#toolbar-loading").ajaxStart(function() {
+				$(this).show();
+			});
 
 			$.ajax({
 				type: "POST",
 				url: "/findpath/",
 				data: data,
 				statusCode: {
-					404: function() {
-						alert('Please enter start and end values');
+					404: function(result) {
+						alert(result);
 					},
 					500: function() {
 						alert('Server returned HTTP 500, use Firebug or Chrome JavaScript console for more info.');
@@ -580,6 +587,7 @@ var WayFinder = function() {
 				success: function(result) {
 					var path = [];
 
+					console.log(result);	
 					for (var i = 0; i < result.length; i++) {
 						var latlng = new google.maps.LatLng(result[i][0], result[i][1]);
 						path.push(latlng);
@@ -587,7 +595,19 @@ var WayFinder = function() {
 
 					testPolylineOptions.path = path;
 					var testPath = new google.maps.Polyline(testPolylineOptions);
+
+					if (previousPath) {
+						previousPath.setMap(null);
+						previousPath = testPath;
+					} else {
+						previousPath = testPath;
+					}
+
 					testPath.setMap(map);
+
+					$("#toolbar-loading").ajaxStop(function() {
+						$(this).hide();
+					});
 				}
 			});
 
