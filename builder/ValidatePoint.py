@@ -1,6 +1,6 @@
-import math
 from wayfinder.builder.models import Nodes, Paths
 from django.db.models import Q
+from numpy import sqrt
 
 def validate(point):
 	nodes = Nodes.objects.filter(lat__lt=point[0]+.001, lat__gt=point[0]-.001, lng__lt=point[1]+.001, lng__gt=point[1]-.001)
@@ -48,4 +48,4 @@ def isEqual(point1, point2):
 	return point1[0] == point2[0] and point1[1] == point2[1]
 	
 def calcDistance(p1, p2):
-	return math.sqrt( (p1[0]-p2[0]) * (p1[0]-p2[0]) + (p1[1]-p2[1]) * (p1[1]-p2[1]))
+	return sqrt( (p1[0]-p2[0]) * (p1[0]-p2[0]) + (p1[1]-p2[1]) * (p1[1]-p2[1]))

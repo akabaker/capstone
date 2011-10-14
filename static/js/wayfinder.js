@@ -11,14 +11,15 @@ var WayFinder = function() {
 	var testPaths = [];
 	var polyLineOptions = {
 		strokeColor: "FF0000",
-		strokeOpacity: 4.0,
-		strokeWeight: 3
+		strokeOpacity: 1.0,
+		strokeWeight: 3,
+		clickable: false
 	};
 	var testPolylineOptions = {
 		strokeColor: "#FFE303",
 		strokeOpacity: 1.0,
 		strokeWeight: 4,
-		zIndex: 100
+		clickable: false
 	};
 	var markerOptions = {
 		map: map,
@@ -256,14 +257,6 @@ var WayFinder = function() {
 		});
 	}
 
-	function toggleBounce(marker) {
-		if (marker.getAnimation() != null) {
-			marker.setAnimation(null);
-		} else {
-			marker.setAnimation(google.maps.Animation.BOUNCE);
-		}
-	}
-
 	/**
 	 * deletePath
 	 * Delete path
@@ -285,7 +278,7 @@ var WayFinder = function() {
 	 * loadNodes
 	 * Query database and return all nodes
 	 */
-	function loadNodes() {
+	function loadNodes(bounds) {
 		$.ajax({
 			type: "GET",
 			url: "/loadnodes/",
@@ -301,7 +294,6 @@ var WayFinder = function() {
 						if (nodes[i].fields.label == null) {
 							markerOptions.labelContent = undefined;
 						} else {
-							//marker.labelContent = nodes[i].fields.label;
 							markerOptions.labelContent = nodes[i].fields.label;
 						}
 
@@ -314,8 +306,6 @@ var WayFinder = function() {
 						startPath(marker, true);
 					}
 				} else {
-					//createLogWindow();
-					//$("#log-display").html("<span>No saved nodes</span>");
 					$.jGrowl("No saved nodes, click on the map to being editing!");
 				}
 			}
