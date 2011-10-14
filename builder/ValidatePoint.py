@@ -3,7 +3,7 @@ from wayfinder.builder.models import Nodes, Paths
 from django.db.models import Q
 
 def validate(point):
-	nodes = Nodes.objects.filter(lat__lt=point[0]+.0005, lat__gt=point[0]-.0005, lng__lt=point[1]+.0005, lng__gt=point[1]-.0005)
+	nodes = Nodes.objects.filter(lat__lt=point[0]+.001, lat__gt=point[0]-.001, lng__lt=point[1]+.001, lng__gt=point[1]-.001)
 	if nodes:
 		return 1
 	return -1
@@ -11,7 +11,7 @@ def validate(point):
 def getPoint(point):
 	p = [0,0,"",0,0,[]]
 	notDefined = 1
-	allNodes = Nodes.objects.filter(lat__lt=point[0]+.0005, lat__gt=point[0]-.0005, lng__lt=point[1]+.0005, lng__gt=point[1]-.0005)
+	allNodes = Nodes.objects.filter(lat__lt=point[0]+.001, lat__gt=point[0]-.001, lng__lt=point[1]+.001, lng__gt=point[1]-.001)
 	for node in allNodes:
 		if notDefined:
 			p[0] = node.lat

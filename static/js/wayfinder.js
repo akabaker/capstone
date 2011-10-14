@@ -563,7 +563,13 @@ var WayFinder = function() {
 			setStartPoint();
 		});
 
-		$("#toolbar-edit").button();
+		/*
+		$("#toolbar-edit").button().click(function() {
+			$("#map-canvas").click(function() {
+				return false;
+			});
+		});
+		*/
 
 		$("#toolbar-run").button().click(function() {
 			var data = $("#toolbar-findpath").serialize();
@@ -615,6 +621,8 @@ var WayFinder = function() {
 		});
 
 		$("#toolbar-useraccess").buttonset();
+
+		$("#toolbar-edit").button();
 
 		$("#toolbar-clear").button({
 			icons: { primary: "ui-icon-bookmark" }

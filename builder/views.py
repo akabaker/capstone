@@ -13,6 +13,7 @@ from django.core import serializers
 from wayfinder.builder.models import Nodes, Paths
 from wayfinder.builder.forms import FindPath
 from django import forms
+from math import *
 import urllib
 import Pathfind
 
@@ -186,6 +187,17 @@ def create_path(request):
 
 		p.save()
 		return HttpResponse("node1: {0} node2: {1}".format(node1, node2))
+
+def haversine(lon1, lat1, lon2, lat2):
+	# convert decimal degrees to radians 
+	lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+	# haversine formula 
+	dlon = lon2 - lon1 
+	dlat = lat2 - lat1 
+	a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+	c = 2 * asin(sqrt(a)) 
+	km = 6367 * c
+	return km 
 
 @login_required
 def find_path(request):
