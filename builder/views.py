@@ -243,6 +243,7 @@ def find_path(request):
 
 				#Add our starting location to the front of the list
 				returnedPath.insert(0, start)
+				d += haversine(returnedPath[0][1],returnedPath[0][0], returnedPath[1][1], returnedPath[1][0])
 				path_data['returnedPath'] = returnedPath	
 				path_data['distance'] = round(d, 3)
 				#return HttpResponse(json.dumps(returnedPath), mimetype='application/json')
