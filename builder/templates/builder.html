@@ -24,6 +24,19 @@
 
 			{% include 'findpathform.html' %}
 
+			<!-- start jquery template -->
+			<div id="toolbar-pathstatslist"></div>
+			<script id="toolbar-pathstats" type="text/x-jquery-tmpl">
+			<h5 class="toolbarheader">Test Path Stats</h5>
+				<dl class="pathlist">
+					<dt>Time to find:</dt>
+						<dd>${timeToFind} seconds</dd>
+					<dt>Total distance:</dt>
+						<dd>${distance} miles</dd>
+				</dl>
+			</script>
+			<!-- end jquery template -->
+
 			<h5 class="toolbarheader">Destinations</h5>
 			<div id="toolbar-destlist">
 			</div>

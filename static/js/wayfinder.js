@@ -19,6 +19,7 @@ var WayFinder = function() {
 		strokeColor: "#FFE303",
 		strokeOpacity: 1.0,
 		strokeWeight: 4,
+		zIndex: 500,
 		clickable: false
 	};
 	var markerOptions = {
@@ -31,6 +32,7 @@ var WayFinder = function() {
 		labelClass: "labels",
 		labelContent: "",
 	};
+	var loadedNodes = [];
 	var previousPath;
 
 	/**
@@ -278,13 +280,14 @@ var WayFinder = function() {
 	 * loadNodes
 	 * Query database and return all nodes
 	 */
-	function loadNodes(bounds) {
+	function loadNodes() {
 		$.ajax({
 			type: "GET",
 			url: "/loadnodes/",
 			success: function(result) {
 				var nodes = JSON.parse(result);
 				var nodesLength = nodes.length;
+				var placedNodes = [];
 
 				if (nodesLength != 0) {
 					for (var i = 0; i < nodesLength; i++) {
@@ -301,9 +304,10 @@ var WayFinder = function() {
 
 						// Set the label back to an emtpy string
 						markerOptions.labelContent = "";
-
 						// Place marker and re-add listeners
 						startPath(marker, true);
+
+						placedNodes.push(latLng);
 					}
 				} else {
 					$.jGrowl("No saved nodes, click on the map to being editing!");
@@ -582,10 +586,10 @@ var WayFinder = function() {
 				},
 				success: function(result) {
 					var path = [];
-
-					console.log(result);	
-					for (var i = 0; i < result.length; i++) {
-						var latlng = new google.maps.LatLng(result[i][0], result[i][1]);
+					//for (var i = 0; i < result.length; i++) {
+					for (var i = 0; i < result.returnedPath.length; i++) {
+						//var latlng = new google.maps.LatLng(result[i][0], result[i][1]);
+						var latlng = new google.maps.LatLng(result.returnedPath[i][0], result.returnedPath[i][1]);
 						path.push(latlng);
 					}
 
@@ -600,6 +604,14 @@ var WayFinder = function() {
 					}
 
 					testPath.setMap(map);
+					
+					var pathStats = {
+						timeToFind: result.time_to_find,
+						distance: result.distance,
+						//walkingTime: result.walking_time
+					};
+
+					$("#toolbar-pathstatslist").html($("#toolbar-pathstats").tmpl(pathStats));
 
 					$("#toolbar-loading").ajaxStop(function() {
 						$(this).hide();

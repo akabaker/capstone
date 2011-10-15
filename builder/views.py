@@ -12,8 +12,10 @@ from django.contrib.auth.models import AnonymousUser
 from django.core import serializers
 from wayfinder.builder.models import Nodes, Paths
 from wayfinder.builder.forms import FindPath
+from numpy import sin, cos, sqrt, radians, arctan2, ceil
+import time
+from math import asin
 from django import forms
-from math import *
 import urllib
 import Pathfind
 
@@ -196,8 +198,11 @@ def haversine(lon1, lat1, lon2, lat2):
 	dlat = lat2 - lat1 
 	a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
 	c = 2 * asin(sqrt(a)) 
-	km = 6367 * c
-	return km 
+	#km = 6367 * c
+	#6367 radius of the earth in km
+	#3961 radius of the earth in miles
+	miles = 3961 * c
+	return miles
 
 @login_required
 def find_path(request):
@@ -218,17 +223,29 @@ def find_path(request):
 			start = [float(start_node['lat']), float(start_node['lng'])]
 			end = [end_node.lat, end_node.lng]
 			try:
+				start_time = time.time()
 				path = Pathfind.pathFind(start, end)
 			except RuntimeError:
 				return Http404('Unable to find path')
 			else:
 				returnedPath = []
+				path_data = {}
+				path_data['time_to_find'] = round(time.time() - start_time, 3)
+				prev = "" #Previous node
+				d = 0 #Total traversed distance
 				for p in path:
 					returnedPath.append([p[0],p[1]])
+					if len(prev) == 0:
+						prev = p
+					else:
+						d+=haversine(p[1],p[0],prev[1],prev[0])
+						prev = p
 
 				#Add our starting location to the front of the list
 				returnedPath.insert(0, start)
-				return HttpResponse(json.dumps(returnedPath), mimetype='application/json')
-
+				path_data['returnedPath'] = returnedPath	
+				path_data['distance'] = round(d, 3)
+				#return HttpResponse(json.dumps(returnedPath), mimetype='application/json')
+				return HttpResponse(json.dumps(path_data), mimetype='application/json')
 		else:
 			return HttpResponse('invalid')

@@ -185,6 +185,17 @@ body {
 #toolbar-loading {
 	display: none;
 }
+
+.pathlist {
+}
+
+.pathlist dt {
+	font-weight: bold;
+}
+
+.pathlist dd {
+	padding: 2px;
+}
 /* End Toolbar */
 
 /**
