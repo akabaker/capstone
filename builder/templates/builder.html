@@ -19,6 +19,12 @@
 		{% if user.is_authenticated %}
 			<h5 class="toolbarheader">Map Utilities</h5>
 			<button id="toolbar-clear">Clear Map</button>
+			<div class="toolbar-checkbox">
+				<input type="checkbox" id="toolbar-markers" /><label for="toolbar-markers">Toggle Markers</label>
+			</div>
+			<div class="toolbar-checkbox">
+				<input type="checkbox" id="toolbar-paths" /><label for="toolbar-paths">Toggle Paths</label>
+			</div>
 			<!--<input type="checkbox" id="toolbar-edit" /><label for="toolbar-edit">Edit</label>-->
 			<!--<button id="toolbar-save">Save State</button>-->
 

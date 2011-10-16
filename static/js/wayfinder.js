@@ -32,7 +32,6 @@ var WayFinder = function() {
 		labelClass: "labels",
 		labelContent: "",
 	};
-	var loadedNodes = [];
 	var previousPath;
 
 	/**
@@ -179,11 +178,15 @@ var WayFinder = function() {
 
 					polyLineOptions.path = path;
 					var segment = new google.maps.Polyline(polyLineOptions);
-
+					addPathToPaths(segment);
 					segment.setMap(map);
 				}
 			}
 		});
+	}
+
+	function addPathToPaths(path) {
+		paths.push(path);
 	}
 
 	/**
@@ -225,6 +228,7 @@ var WayFinder = function() {
 	 * addMarkerListeners
 	 */
 	function addMarkerListeners(marker) {
+		nodes.push(marker);
 		// Delete node
 		google.maps.event.addListener(marker, "dragstart", function() {
 			deleteNode(this);
@@ -364,6 +368,7 @@ var WayFinder = function() {
 			pair.clear();
 		} else {
 			segment.setMap(map);
+			paths.push(segment);
 
 			// Delay the DB write for a litte bit
 			setTimeout(function() {
@@ -553,7 +558,10 @@ var WayFinder = function() {
 			window.location = "/admin";
 		});
 
-		$("#toolbar-startpoint").button().click(function() {
+		$("#toolbar-startpoint").button({
+			icons: { primary: "ui-icon-flag" }
+		})
+		.click(function() {
 			setStartPoint();
 		});
 
@@ -622,6 +630,30 @@ var WayFinder = function() {
 			return false;
 		});
 
+		$("#toolbar-markers").click(function() {
+			if ($("#toolbar-markers").is(":checked")) {
+				nodes.forEach(function(elem, index) {
+					elem.setMap(null);
+				});
+			} else {
+				nodes.forEach(function(elem, index) {
+					elem.setMap(map);
+				});
+			}
+		});
+
+		$("#toolbar-paths").click(function() {
+			if ($("#toolbar-paths").is(":checked")) {
+				paths.forEach(function(elem, index) {
+					elem.setMap(null);
+				});
+			} else {
+				paths.forEach(function(elem, index) {
+					elem.setMap(map);
+				});
+			}
+		});
+
 		$("#toolbar-useraccess").buttonset();
 
 		$("#toolbar-edit").button();
@@ -640,7 +672,7 @@ var WayFinder = function() {
 	(function autoComplete() {
 		$("#end").autocomplete({
 			source: "/labellist/",
-			minLength: 2
+			minLength: 1
 		});
 	})();
 
