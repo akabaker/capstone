@@ -102,6 +102,7 @@ var Map = function() {
 		var myOptions = {
 			zoom: mapZoom,
 			center: center,
+			disableDoubleClickZoom: true,
 			mapTypeId: google.maps.MapTypeId.HYBRID
 		};
 
@@ -123,6 +124,7 @@ var Map = function() {
 			localStorage.mapZoom = JSON.stringify(map.getZoom());
 		});
 
+		map.enableKeyDragZoom();
 		return map;
 	}
 

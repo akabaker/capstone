@@ -25,6 +25,7 @@ var WayFinder = function() {
 	var markerOptions = {
 		map: map,
 		icon: "/static/images/pedestriancrossing.png",
+		//icon: "/static/images/vertex.png",
 		draggable: true,
 		raiseOnDrag: false,
 		animation: google.maps.Animation.DROP,
@@ -256,10 +257,12 @@ var WayFinder = function() {
 
 		google.maps.event.addListener(marker, "mouseover", function() {
 			this.setIcon("/static/images/pedestriancrossing_over.png");
+			//this.setIcon("/static/images/vertexOver.png");
 		});
 
 		google.maps.event.addListener(marker, "mouseout", function() {
 			this.setIcon("/static/images/pedestriancrossing.png");
+			//this.setIcon("/static/images/vertex.png");
 		});
 	}
 
@@ -285,14 +288,14 @@ var WayFinder = function() {
 	 * Query database and return all nodes
 	 */
 	function loadNodes() {
+		var mcOptions = {gridSize: 50, maxZoom: 19};
 		$.ajax({
 			type: "GET",
 			url: "/loadnodes/",
 			success: function(result) {
 				var nodes = JSON.parse(result);
 				var nodesLength = nodes.length;
-				var placedNodes = [];
-
+				var markers = [];
 				if (nodesLength != 0) {
 					for (var i = 0; i < nodesLength; i++) {
 						var latLng = new google.maps.LatLng(nodes[i].fields.lat, nodes[i].fields.lng);
@@ -305,14 +308,15 @@ var WayFinder = function() {
 						}
 
 						var marker = new MarkerWithLabel(markerOptions);
+						markers.push(marker);
 
 						// Set the label back to an emtpy string
 						markerOptions.labelContent = "";
 						// Place marker and re-add listeners
 						startPath(marker, true);
-
-						placedNodes.push(latLng);
 					}
+
+					var mc = new MarkerClusterer(map, markers, mcOptions);
 				} else {
 					$.jGrowl("No saved nodes, click on the map to being editing!");
 				}
