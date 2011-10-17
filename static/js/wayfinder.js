@@ -10,9 +10,10 @@ var WayFinder = function() {
 	var startPoint = [];
 	var testPaths = [];
 	var polyLineOptions = {
-		strokeColor: "FF0000",
+		strokeColor: "#FF0000",
 		strokeOpacity: 1.0,
 		strokeWeight: 3,
+		zIndex: 200,
 		clickable: false
 	};
 	var testPolylineOptions = {
@@ -165,6 +166,7 @@ var WayFinder = function() {
 	 * Loads paths from database
 	 */
 	function loadPaths() {
+		$("#toolbar-loading").show();
 		$.ajax({
 			type: "GET",
 			url: "/loadpaths/",
@@ -172,7 +174,6 @@ var WayFinder = function() {
 				var paths = JSON.parse(result);
 				var pathsLength = paths.length;
 				for (var i = 0; i < pathsLength; i++) {
-
 					var path = [];
 					path.push(new google.maps.LatLng(paths[i].fields.node1[0], paths[i].fields.node1[1]));
 					path.push(new google.maps.LatLng(paths[i].fields.node2[0], paths[i].fields.node2[1]));
@@ -182,6 +183,7 @@ var WayFinder = function() {
 					addPathToPaths(segment);
 					segment.setMap(map);
 				}
+				$("#toolbar-loading").hide();
 			}
 		});
 	}
