@@ -206,6 +206,8 @@ def haversine(lon1, lat1, lon2, lat2):
 
 @login_required
 def find_path(request):
+	AVG_WALKING_SPEED = 3.1
+
 	if request.method == 'POST':
 		form = FindPath(request.POST)
 
@@ -244,9 +246,11 @@ def find_path(request):
 				#Add our starting location to the front of the list
 				returnedPath.insert(0, start)
 				d += haversine(returnedPath[0][1],returnedPath[0][0], returnedPath[1][1], returnedPath[1][0])
-				path_data['returnedPath'] = returnedPath	
+				path_data['returned_path'] = returnedPath	
+				#Distance traversed from the users location to the end node
 				path_data['distance'] = round(d, 3)
-				#return HttpResponse(json.dumps(returnedPath), mimetype='application/json')
+				#Estimated walking time in minutes
+				path_data['walking_time'] = round((path_data['distance'] / AVG_WALKING_SPEED) * 60, 2)
 				return HttpResponse(json.dumps(path_data), mimetype='application/json')
 		else:
 			return HttpResponse('invalid')

@@ -598,10 +598,9 @@ var WayFinder = function() {
 				},
 				success: function(result) {
 					var path = [];
-					//for (var i = 0; i < result.length; i++) {
-					for (var i = 0; i < result.returnedPath.length; i++) {
-						//var latlng = new google.maps.LatLng(result[i][0], result[i][1]);
-						var latlng = new google.maps.LatLng(result.returnedPath[i][0], result.returnedPath[i][1]);
+					var resultLength = result.returned_path.length;
+					for (var i = 0; i < resultLength; i++) {
+						var latlng = new google.maps.LatLng(result.returned_path[i][0], result.returned_path[i][1]);
 						path.push(latlng);
 					}
 
@@ -620,7 +619,8 @@ var WayFinder = function() {
 					var pathStats = {
 						timeToFind: result.time_to_find,
 						distance: result.distance,
-						//walkingTime: result.walking_time
+						nodesCount: resultLength - 1,
+						walkingTime: result.walking_time
 					};
 
 					$("#toolbar-pathstatslist").html($("#toolbar-pathstats").tmpl(pathStats));
