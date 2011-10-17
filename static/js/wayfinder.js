@@ -228,8 +228,10 @@ var WayFinder = function() {
 	/**
 	 * addMarkerListeners
 	 */
-	function addMarkerListeners(marker) {
-		nodes.push(marker);
+	function addMarkerListeners(marker, toggle) {
+		if (!toggle) {
+			nodes.push(marker);
+		}
 		// Delete node
 		google.maps.event.addListener(marker, "dragstart", function() {
 			deleteNode(this);
@@ -249,7 +251,6 @@ var WayFinder = function() {
 		// Add to node to path
 		google.maps.event.addListener(marker, "click", function() {
 			pair.push(this);
-
 			if (pair.getLength() === 2) {
 				pathComplete();
 			}
@@ -288,7 +289,7 @@ var WayFinder = function() {
 	 * Query database and return all nodes
 	 */
 	function loadNodes() {
-		var mcOptions = {gridSize: 50, maxZoom: 19};
+		var mcOptions = {gridSize: 75, maxZoom: 20};
 		$.ajax({
 			type: "GET",
 			url: "/loadnodes/",
@@ -309,7 +310,6 @@ var WayFinder = function() {
 
 						var marker = new MarkerWithLabel(markerOptions);
 						markers.push(marker);
-
 						// Set the label back to an emtpy string
 						markerOptions.labelContent = "";
 						// Place marker and re-add listeners
@@ -389,8 +389,6 @@ var WayFinder = function() {
 	function isPathEqual(path) {
 		var returnCode = false
 		paths.forEach(function(elem, index) {
-			console.log(index);
-
 			//TODO make this less wtf
 			if (elem.getPath().getAt(0).equals(path.getPath().getAt(0)) && elem.getPath().getAt(1).equals(path.getPath().getAt(1)) ||
 				elem.getPath().getAt(1).equals(path.getPath().getAt(0)) && elem.getPath().getAt(0).equals(path.getPath().getAt(1))) {
@@ -634,17 +632,21 @@ var WayFinder = function() {
 			return false;
 		});
 
+		/*
 		$("#toolbar-markers").click(function() {
 			if ($("#toolbar-markers").is(":checked")) {
 				nodes.forEach(function(elem, index) {
-					elem.setMap(null);
+					elem.setDraggable(false);
+					google.maps.event.clearInstanceListeners(elem);
 				});
 			} else {
 				nodes.forEach(function(elem, index) {
-					elem.setMap(map);
+					elem.setDraggable(true);
+					addMarkerListeners(elem, true);
 				});
 			}
 		});
+		*/
 
 		$("#toolbar-paths").click(function() {
 			if ($("#toolbar-paths").is(":checked")) {
