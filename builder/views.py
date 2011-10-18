@@ -83,6 +83,16 @@ def label_list(request):
 
 		return HttpResponse(json.dumps(label_list), mimetype='application/json')
 
+def mobile(request):
+	if request.method == 'GET':
+		#jsondata = serializers.serialize('json', Nodes.objects.filter(label__isnull=False).order_by('label'), fields=('lat','lng','label'))
+		dest_list = Nodes.objects.filter(label__isnull=False).order_by('label')
+		return render_to_response('mobile.html', {
+			'nodes': dest_list,
+		})
+
+		return HttpResponse(json.dumps(jsondata), mimetype='application/json')
+
 @login_required
 def dest_list(request):
 	if request.method == 'GET':
@@ -204,9 +214,8 @@ def haversine(lon1, lat1, lon2, lat2):
 	miles = 3961 * c
 	return miles
 
-@login_required
 def find_path(request):
-	AVG_WALKING_SPEED = 3.1
+	AVG_WALKING_SPEED = 3.3
 
 	if request.method == 'POST':
 		form = FindPath(request.POST)
