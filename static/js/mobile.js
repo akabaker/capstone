@@ -12,7 +12,8 @@ var WayFinderMobile = function() {
 
 	/**
 	* route
-	* Performs ajax call to findpath. If lat,lng are present start from those coordinates to the destination.
+	* @param String start Lat and lng of the starting position.
+	* Performs ajax call to findpath.
 	*/
 	//function route(lat, lng) {
 	function route(start) {
@@ -39,6 +40,7 @@ var WayFinderMobile = function() {
 		*/
 
 		$.mobile.showPageLoadingMsg();
+
 		$.ajax({
 			type: "POST",
 			url: "/findpath/",
@@ -72,6 +74,17 @@ var WayFinderMobile = function() {
 				var centerLatLng = new google.maps.LatLng(result.returned_path[0][0], result.returned_path[0][1]);
 				map.setCenter(centerLatLng);
 				testPath.setMap(map);
+
+				var pathStats = {
+					distance: result.distance,
+					walkingTime: result.walking_time
+				};
+				$("#route-details").html("<dl>"
+					+ "<dt>Distance:</dt>" + "<dd>" + result.distance + " miles</dd>"
+					+ " <dt>Walking Time:</dt>" + "<dd>" + result.walking_time  + " minutes</dd>"
+					+ "</dl>"
+				);
+
 				$.mobile.hidePageLoadingMsg();
 			}
 		});
