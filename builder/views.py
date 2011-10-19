@@ -214,6 +214,7 @@ def haversine(lon1, lat1, lon2, lat2):
 	miles = 3961 * c
 	return miles
 
+@csrf_exempt
 def find_path(request):
 	AVG_WALKING_SPEED = 3.3
 

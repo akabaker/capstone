@@ -1,9 +1,5 @@
 <div data-role="fieldcontain">
 	<form action="" id="mobile-findpath" method="post">
-		<!--
-		<label for="checkbox-0">Use current location?</label>
-		<input type="checkbox" name="checkbox-0" id="checkbox-0" checked="checked" class="custom" />
-		-->
 		<label for="mobile-start" class="select">Start:</label>
 		<select name="start" id="mobile-start">
 			<option data-placeholder="true" value="">Current Position</option>
@@ -16,6 +12,6 @@
 			{% for node in nodes %}	
 			<option value="{{ node.label }}">{{ node.label }}</option>
 			{% endfor %}
-		</form>
-	</select>
+		</select>
+	</form>
 </div>
