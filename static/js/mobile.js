@@ -38,6 +38,7 @@ var WayFinderMobile = function() {
 		}
 		*/
 
+		$.mobile.showPageLoadingMsg();
 		$.ajax({
 			type: "POST",
 			url: "/findpath/",
@@ -71,6 +72,7 @@ var WayFinderMobile = function() {
 				var centerLatLng = new google.maps.LatLng(result.returned_path[0][0], result.returned_path[0][1]);
 				map.setCenter(centerLatLng);
 				testPath.setMap(map);
+				$.mobile.hidePageLoadingMsg();
 			}
 		});
 	}
