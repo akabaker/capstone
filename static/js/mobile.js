@@ -9,12 +9,12 @@ var WayFinderMobile = function() {
 
 	var markerOptions = {
 		icon: "/static/images/pedestriancrossing.png",
-		animation: google.maps.Animation.DROP,
 	};
 
 	var map = null;
 	var previousPath;
 	var previousMarker;
+	var mapBounds;
 
 	/**
 	 * route
@@ -154,7 +154,17 @@ var WayFinderMobile = function() {
 			} else {
 				previousMarker = marker;
 			}
-			marker.setMap(map);
+
+			//If the marker is contained in the current map bounds, place the maker
+			//Otherwise, panto the new latlng and set that to the map center and update mapBounds.
+			if (map.getBounds().contains(latlng)) {
+				marker.setMap(map);
+			} else {
+				map.panTo(latlng);
+				map.setBounds(latlng);
+				marker.setMap(map);
+			}
+
 		},
 
 		/**
