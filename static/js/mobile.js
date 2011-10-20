@@ -7,8 +7,14 @@ var WayFinderMobile = function() {
 		clickable: false
 	};
 
+	var markerOptions = {
+		icon: "/static/images/pedestriancrossing.png",
+		animation: google.maps.Animation.DROP,
+	};
+
 	var map = null;
 	var previousPath;
+	var previousMarker;
 
 	/**
 	 * route
@@ -62,6 +68,25 @@ var WayFinderMobile = function() {
 				map.setCenter(centerLatLng);
 				testPath.setMap(map);
 
+				//Array of objects containing markerOptions for start/stop positions on the map
+				var routeMarkers = [{text: "Start", color: "00FF00", pos: path[0]},{text: "Stop", color: "FF0000", pos: path.pop()}];
+				for (var i = 0; i < routeMarkers.length; i++) {
+					var marker = new StyledMarker({
+									styleIcon: new StyledIcon(
+										StyledIconTypes.BUBBLE, {
+												color: routeMarkers[i].color,
+												text: routeMarkers[i].text,
+										}),
+									position: routeMarkers[i].pos,
+									animation: google.maps.Animation.DROP,
+									draggable: false
+								});
+
+					marker.setMap(map);
+				}
+
+				//Indicate starting point
+
 				//Messy, but appends route travel data to DOM
 				$("#route-details").html("<dl>"
 					+ "<dt>Distance:</dt>" + "<dd>" + result.distance + " miles</dd>"
@@ -110,6 +135,32 @@ var WayFinderMobile = function() {
 			}
 		},
 
+		/**
+		 * updatePosition
+		 * @param Object position Geolocation object
+		 */
+		updatePosition: function(position) {
+			var latlng = new google.maps.LatLng(
+				position.coords.latitude,
+				position.coords.longitude
+			);
+
+			markerOptions.position = latlng;
+			var marker = new google.maps.Marker(markerOptions);
+
+			if (previousMarker) {
+				previousMarker.setMap(null);
+				previousMarker = marker;
+			} else {
+				previousMarker = marker;
+			}
+			marker.setMap(map);
+		},
+
+		/**
+		 * handleError
+		 * @param Object error Geolocation error message
+		 */
 		handleError: function(error) {
 			switch (error.code) {
 				case error.PERMISSION_DENIED:
@@ -127,6 +178,9 @@ var WayFinderMobile = function() {
 			}
 		},
 
+		/**
+		 * Navigator.geolocation options
+		 */
 		options: {
 			enableHighAccuracy: true,
 			timeout: 30000, //time out after 10 seconds
@@ -142,10 +196,21 @@ $("#two").live("pageshow", function() {
 	wMobile = WayFinderMobile();
 
 	if(navigator.geolocation) {
+
 		navigator.geolocation.getCurrentPosition(wMobile.initialize, wMobile.handleError, wMobile.options);
-		//var watchID = navigator.geolocation.watchPosition(function(postition)) {
-		//	updateMenu(position.coords.latitude,position.coords.longitude);
-		//});
+		var watchID;
+
+		$("#mobile-track").click(function() {
+			//Checks position every 5 seconds
+			watchID = navigator.geolocation.watchPosition(wMobile.updatePosition, wMobile.handleError, {enableHighAccuracy: true, frequency: 5000});
+			alert("Position updates enabled");
+		});
+
+		$("#mobile-track-stop").click(function() {
+			navigator.geolocation.clearWatch(watchID);
+			alert("Position updates disabled");
+		});
+
 	} else {
 		wMobile.initialize(38.94617, -92.32866);
 	}
