@@ -11,11 +11,10 @@ var WayFinderMobile = function() {
 	var previousPath;
 
 	/**
-	* route
-	* @param String start Lat and lng of the starting position.
-	* Performs ajax call to findpath.
-	*/
-	//function route(lat, lng) {
+	 * route
+	 * @param String start Lat and lng of the starting position.
+	 * Performs ajax call to findpath.
+	 */
 	function route(start) {
 		var params = {
 			csrfmiddlewaretoken: $("#csrfmiddlewaretoken").val(),
@@ -23,22 +22,10 @@ var WayFinderMobile = function() {
 			end: $("#mobile-end").val()
 		}
 
+		//urlencode data object
 		var data = $.param(params);
-		/*
-		if (typeof lat != undefined && typeof lng != undefined) {
-			var start = lat + "," + lng;
-			params = {
-				csrfmiddlewaretoken: $("#csrfmiddlewaretoken").val(),
-				start: start,
-				end: $("#mobile-end").val()
-			}
 
-			data = $.param(params);
-		} else {
-			data = $("#mobile-findpath").serialize();
-		}
-		*/
-
+		//Ajax loadeing
 		$.mobile.showPageLoadingMsg();
 
 		$.ajax({
@@ -75,16 +62,14 @@ var WayFinderMobile = function() {
 				map.setCenter(centerLatLng);
 				testPath.setMap(map);
 
-				var pathStats = {
-					distance: result.distance,
-					walkingTime: result.walking_time
-				};
+				//Messy, but appends route travel data to DOM
 				$("#route-details").html("<dl>"
 					+ "<dt>Distance:</dt>" + "<dd>" + result.distance + " miles</dd>"
 					+ " <dt>Walking Time:</dt>" + "<dd>" + result.walking_time  + " minutes</dd>"
 					+ "</dl>"
 				);
 
+				//Hide ajax loading message
 				$.mobile.hidePageLoadingMsg();
 			}
 		});
@@ -93,13 +78,16 @@ var WayFinderMobile = function() {
 	return {
 		/**
 		 * initialize
-		 * @param Number lat Latitude
-		 * @param Number lng Longitude
+		 * @param Object position Navigator geolocation object
 		 * @param Boolean geo Flag for hardware support of geolocation
 		 * Create the map
 		 */
-		initialize: function(lat, lng) {
-			var latlng = new google.maps.LatLng(lat, lng);
+		initialize: function(position) {
+			var latlng = new google.maps.LatLng(
+				position.coords.latitude,
+				position.coords.longitude
+			);
+
 			var myOptions = {
 				zoom: 18,
 				center: latlng,
@@ -117,9 +105,32 @@ var WayFinderMobile = function() {
 				start = $("#mobile-start").val();
 				route(start);
 			} else {
-				start = lat + "," + lng;
+				start = position.coords.latitude + "," + position.coords.longitude;
 				route(start);
 			}
+		},
+
+		handleError: function(error) {
+			switch (error.code) {
+				case error.PERMISSION_DENIED:
+					alert('Permission was denied');
+					break;
+				case error.POSITION_UNAVAILABLE:
+					alert('Position is currently unavailable.');
+					break;
+				case error.PERMISSION_DENIED_TIMEOUT:
+					alert('User took to long to grant/deny permission.');
+					break;
+				case error.UNKNOWN_ERROR:
+					alert('An unknown error occurred.')
+					break;
+			}
+		},
+
+		options: {
+			enableHighAccuracy: true,
+			timeout: 30000, //time out after 10 seconds
+			maximumAge: 120000 //only accept cached location that are 2 min old
 		}
 	};
 };
@@ -131,10 +142,7 @@ $("#two").live("pageshow", function() {
 	wMobile = WayFinderMobile();
 
 	if(navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(function(position){
-			wMobile.initialize(position.coords.latitude, position.coords.longitude);
-			//console.log(position.coords.latitude, position.coords.longitude);
-		});
+		navigator.geolocation.getCurrentPosition(wMobile.initialize, wMobile.handleError, wMobile.options);
 		//var watchID = navigator.geolocation.watchPosition(function(postition)) {
 		//	updateMenu(position.coords.latitude,position.coords.longitude);
 		//});
