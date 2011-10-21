@@ -12,9 +12,7 @@ var WayFinderMobile = function() {
 	};
 
 	var map = null;
-	var previousPath;
 	var previousMarker;
-	var mapBounds;
 
 	/**
 	 * route
@@ -57,16 +55,13 @@ var WayFinderMobile = function() {
 				testPolylineOptions.path = path;
 				var testPath = new google.maps.Polyline(testPolylineOptions);
 
-				if (previousPath) {
-					previousPath.setMap(null);
-					previousPath = testPath;
-				} else {
-					previousPath = testPath;
-				}
+				//Center map on the starting node..
+				var centerLatLng = new google.maps.LatLng(result.returned_path[0][0], result.returned_path[0][1]);
+				map.setCenter(centerLatLng);
+				testPath.setMap(map);
 
 				//Array of objects containing markerOptions for start/stop positions on the map
-				//var routeMarkers = [{text: "Start", color: "00FF00", pos: path[0]},{text: "Stop", color: "FF0000", pos: path.pop()}];
-				var routeMarkers = [{text: "Start", color: "00FF00", pos: path[0]}];
+				var routeMarkers = [{text: "Start", color: "00FF00", pos: path[0]},{text: "Stop", color: "FF0000", pos: path[path.length - 1]}];
 				for (var i = 0; i < routeMarkers.length; i++) {
 					var marker = new StyledMarker({
 									styleIcon: new StyledIcon(
@@ -76,18 +71,13 @@ var WayFinderMobile = function() {
 										}),
 									position: routeMarkers[i].pos,
 									animation: google.maps.Animation.DROP,
+									map: map,
 									draggable: false
 								});
 
-					marker.setMap(map);
+					//marker.setMap(map);
+					google.maps.event.trigger(map, "resize");
 				}
-
-				//Center map on the starting node..
-				var centerLatLng = new google.maps.LatLng(result.returned_path[0][0], result.returned_path[0][1]);
-				map.setCenter(centerLatLng);
-				testPath.setMap(map);
-
-				//Indicate starting point
 
 				//Messy, but appends route travel data to DOM
 				$("#route-details").html("<dl>"
