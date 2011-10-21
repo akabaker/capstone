@@ -60,11 +60,19 @@
 			<div id="map_canvas" style="width:100%;height:350px;"></div>
 		</div>
 		<div data-role="footer">
-			<div style="margin-left:10px;" data-role="controlgroup" data-type="horizontal">
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#route-popup" data-icon="info" data-rel="dialog" data-transition="pop">Route Details</a></li>
+					<li><a href="#" data-icon="plus" id="mobile-track">Track Pos</a></li>
+					<li><a href="#" data-icon="minus" id="mobile-track-stop">Stop Tracking</a></li>
+				</ul>
+			</div>
+			<!--<div style="margin-left:10px;" data-role="controlgroup" data-type="horizontal">
 				<a href="#route-popup" data-icon="info" data-role="button" data-rel="dialog" data-transition="pop">Route Details</a>	
 				<a href="#" id="mobile-track" data-role="button">Track Pos</a>
 				<a href="#" id="mobile-track-stop" data-role="button">Stop Tracking</a>
 			</div>
+			-->
 			<!--<div id="route-details"></div>-->
 		</div>
 	</div><!-- /page two -->

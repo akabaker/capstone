@@ -64,12 +64,9 @@ var WayFinderMobile = function() {
 					previousPath = testPath;
 				}
 
-				var centerLatLng = new google.maps.LatLng(result.returned_path[0][0], result.returned_path[0][1]);
-				map.setCenter(centerLatLng);
-				testPath.setMap(map);
-
 				//Array of objects containing markerOptions for start/stop positions on the map
-				var routeMarkers = [{text: "Start", color: "00FF00", pos: path[0]},{text: "Stop", color: "FF0000", pos: path.pop()}];
+				//var routeMarkers = [{text: "Start", color: "00FF00", pos: path[0]},{text: "Stop", color: "FF0000", pos: path.pop()}];
+				var routeMarkers = [{text: "Start", color: "00FF00", pos: path[0]}];
 				for (var i = 0; i < routeMarkers.length; i++) {
 					var marker = new StyledMarker({
 									styleIcon: new StyledIcon(
@@ -84,6 +81,11 @@ var WayFinderMobile = function() {
 
 					marker.setMap(map);
 				}
+
+				//Center map on the starting node..
+				var centerLatLng = new google.maps.LatLng(result.returned_path[0][0], result.returned_path[0][1]);
+				map.setCenter(centerLatLng);
+				testPath.setMap(map);
 
 				//Indicate starting point
 
@@ -135,11 +137,35 @@ var WayFinderMobile = function() {
 			}
 		},
 
+		haversine: function(lon1, lat1, lon2, lat2) {
+			var R = 3961; // miles
+			var dLat = (lat2-lat1).toRad();
+			var dLon = (lon2-lon1).toRad();
+			var lat1 = lat1.toRad();
+			var lat2 = lat2.toRad();
+
+			var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+					Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+			var distance = R * c;
+			return distance
+		},
+
 		/**
 		 * updatePosition
 		 * @param Object position Geolocation object
 		 */
 		updatePosition: function(position) {
+			/*
+			var distance = haversine(
+				position.coords.longitude,
+				position.coords.latitude,
+				dest[1],
+				dest[0]	
+			)
+			alert(distance);
+			*/
+
 			var latlng = new google.maps.LatLng(
 				position.coords.latitude,
 				position.coords.longitude
@@ -164,7 +190,6 @@ var WayFinderMobile = function() {
 				map.setBounds(latlng);
 				marker.setMap(map);
 			}
-
 		},
 
 		/**
@@ -192,7 +217,7 @@ var WayFinderMobile = function() {
 		 * Navigator.geolocation options
 		 */
 		options: {
-			enableHighAccuracy: true,
+			enableHighAccuracy: true, //this should make the device provide geoposition data from GPS
 			timeout: 30000, //time out after 10 seconds
 			maximumAge: 120000 //only accept cached location that are 2 min old
 		}
@@ -212,7 +237,7 @@ $("#two").live("pageshow", function() {
 
 		$("#mobile-track").click(function() {
 			//Checks position every 5 seconds
-			watchID = navigator.geolocation.watchPosition(wMobile.updatePosition, wMobile.handleError, {enableHighAccuracy: true, frequency: 5000});
+			watchID = navigator.geolocation.watchPosition(wMobile.updatePosition, wMobile.handleError, {enableHighAccuracy: true});
 			alert("Position updates enabled");
 		});
 
