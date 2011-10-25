@@ -19,6 +19,7 @@ from django import forms
 import urllib
 import Pathfind
 
+#=== Helper functions ===#
 def user_from_session_key(session_key):
     session_engine = __import__(settings.SESSION_ENGINE, {}, {}, [''])
     session_wrapper = session_engine.SessionStore(session_key)
@@ -68,6 +69,8 @@ def save_or_load_map_state(request):
 		else:
 			raise Http404('none')
 
+#=== Django views ===#
+
 # Must render template with the correct RequestContext for access to user auth data
 def builder(request):
 	return render_to_response('builder.html', context_instance=RequestContext(request))
@@ -85,7 +88,6 @@ def label_list(request):
 
 def mobile(request):
 	if request.method == 'GET':
-		#jsondata = serializers.serialize('json', Nodes.objects.filter(label__isnull=False).order_by('label'), fields=('lat','lng','label'))
 		dest_list = Nodes.objects.filter(label__isnull=False).order_by('label')
 		return render_to_response('mobile.html', {
 			'nodes': dest_list,
@@ -129,7 +131,6 @@ def update_node(request):
 
 		else:
 			d = {}
-			#d['label'] = request.POST.get('label')
 			d['label'] = label
 			# Update model with kwargs expansion
 			n.update(**d)

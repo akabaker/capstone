@@ -26,7 +26,6 @@ var WayFinder = function() {
 	var markerOptions = {
 		map: map,
 		icon: "/static/images/pedestriancrossing.png",
-		//icon: "/static/images/vertex.png",
 		draggable: true,
 		raiseOnDrag: false,
 		animation: google.maps.Animation.DROP,
@@ -66,7 +65,6 @@ var WayFinder = function() {
 	 */
 	function deleteNode(marker) {
 		node = prepNode(marker);
-		//createLogWindow();
 
 		$.ajax({
 			type: "POST",
@@ -74,12 +72,10 @@ var WayFinder = function() {
 			data: $.param(node),
 			statusCode: {
 				403: function() {
-					//$("#log-display").html("<span>Action not permitted</span>");
 					$.jGrowl('Action not permitted');
 				}
 			},
 			success: function(result) {
-				//$("#log-display").html("<span>Node deleted at " + node.coords + "</span>");
 				$.jGrowl("Node deleted at " + node.coords);
 				marker.setMap(null);
 				destList();
@@ -100,13 +96,10 @@ var WayFinder = function() {
 			data: $.param(node),
 			statusCode: {
 				403: function() {
-					//$("#log-display").html("<span>Action not permitted</span>");
 					$.jGrowl("Action not permitted");
 				}
 			},
 			success: function(result) {
-				//createLogWindow();
-				//$("#log-display").html("<span>Node created at " + node.coords + "</span>");
 				$.jGrowl("Node created at " + node.coords);
 			}
 		});
@@ -125,19 +118,15 @@ var WayFinder = function() {
 			data: $.param(node),
 			statusCode: {
 				403: function() {
-					//$("#log-display").html("<span>Action not permitted</span>");
 					$.jGrowl("Action not permitted");
 				},
 
 				500: function() {
-					//$("#log-display").html("<span>Destination already exists</span>");
 					$.jGrowl("Destination already exists");
 				}
 			},
 			success: function(result) {
 				marker.setMap(map);
-				//createLogWindow();
-				//$("#log-display").html("<span>Destination " + node.label + " saved" +"</span>");
 				$.jGrowl("Destination " + node.label + " saved");
 				destList();
 			}
@@ -167,12 +156,14 @@ var WayFinder = function() {
 	 */
 	function loadPaths() {
 		$("#toolbar-loading").show();
+
 		$.ajax({
 			type: "GET",
 			url: "/loadpaths/",
 			success: function(result) {
 				var paths = JSON.parse(result);
 				var pathsLength = paths.length;
+
 				for (var i = 0; i < pathsLength; i++) {
 					var path = [];
 					path.push(new google.maps.LatLng(paths[i].fields.node1[0], paths[i].fields.node1[1]));
@@ -183,18 +174,24 @@ var WayFinder = function() {
 					addPathToPaths(segment);
 					segment.setMap(map);
 				}
+
 				$("#toolbar-loading").hide();
 			}
 		});
 	}
 
+	/**
+	 * addPathToPaths
+	 * @param Object path Object containing path
+	 * Add path to paths array.
+	 */
 	function addPathToPaths(path) {
 		paths.push(path);
 	}
 
 	/**
 	 * createPath
-	 * Send edge to database
+	 * Save path to database
 	 */
 	function createPath(path) {
 		var edge = prepPath(path);
@@ -204,7 +201,6 @@ var WayFinder = function() {
 			url: "/createpath/",
 			data: $.param(edge),
 			success: function(result) {
-				//$("#log-display").html("<span>Path created</span>");
 				$.jGrowl("Path created");
 			}
 		});
@@ -260,38 +256,20 @@ var WayFinder = function() {
 
 		google.maps.event.addListener(marker, "mouseover", function() {
 			this.setIcon("/static/images/pedestriancrossing_over.png");
-			//this.setIcon("/static/images/vertexOver.png");
 		});
 
 		google.maps.event.addListener(marker, "mouseout", function() {
 			this.setIcon("/static/images/pedestriancrossing.png");
-			//this.setIcon("/static/images/vertex.png");
-		});
-	}
-
-	/**
-	 * deletePath
-	 * Delete path
-	 */
-	function deletePath(path) {
-		var pathNodes = JSON.stringify(path);	
-
-		$.ajax({
-			type: "POST",
-			url: "/deletepath/",
-			data: pathNodes,
-			success: function(result) {
-				console.log(result);
-			}
 		});
 	}
 
 	/**
 	 * loadNodes
-	 * Query database and return all nodes
+	 * Query database and return all nodes. Uses the markerclusterer object to manage markers.
 	 */
 	function loadNodes() {
 		var mcOptions = {gridSize: 75, maxZoom: 20};
+
 		$.ajax({
 			type: "GET",
 			url: "/loadnodes/",
@@ -299,6 +277,7 @@ var WayFinder = function() {
 				var nodes = JSON.parse(result);
 				var nodesLength = nodes.length;
 				var markers = [];
+
 				if (nodesLength != 0) {
 					for (var i = 0; i < nodesLength; i++) {
 						var latLng = new google.maps.LatLng(nodes[i].fields.lat, nodes[i].fields.lng);
@@ -318,7 +297,9 @@ var WayFinder = function() {
 						startPath(marker, true);
 					}
 
+					//Initialize markerclusterer
 					var mc = new MarkerClusterer(map, markers, mcOptions);
+
 				} else {
 					$.jGrowl("No saved nodes, click on the map to being editing!");
 				}
@@ -358,7 +339,7 @@ var WayFinder = function() {
 
 	/**
 	 * pathComplete
-	 * Checks if path is complete (two nodes placed)
+	 * Checks if path is complete (two nodes placed). If the path is complete save to the database.
 	 */
 	function pathComplete() {
 		var path = [];
@@ -404,7 +385,7 @@ var WayFinder = function() {
 
 	/**
 	 * Create modal forms - the login and registration forms are from built-in 
-	 * django views.
+	 * django views. Executed on pageload
 	 */
 	(function modalForms() {
 		/**
@@ -498,6 +479,7 @@ var WayFinder = function() {
 
 	/**
 	 * destList
+	 * Populates the destination list. Appends the django templates to #toolbar-destlist
 	 */
 	function destList() {
 		$.ajax({
@@ -524,7 +506,7 @@ var WayFinder = function() {
 
 	/**
 	 * clearMap
-	 * Delete map paths and nodes
+	 * Delete map paths and nodes, removes saved mapcenter and mapzoom values
 	 */
 	function clearMap() {
 		var clearOk = confirm("Are you sure?");
@@ -569,14 +551,6 @@ var WayFinder = function() {
 			setStartPoint();
 		});
 
-		/*
-		$("#toolbar-edit").button().click(function() {
-			$("#map-canvas").click(function() {
-				return false;
-			});
-		});
-		*/
-
 		$("#toolbar-run").button().click(function() {
 			var data = $("#toolbar-findpath").serialize();
 			
@@ -594,6 +568,9 @@ var WayFinder = function() {
 					},
 					500: function() {
 						alert('Server returned HTTP 500, use Firebug or Chrome JavaScript console for more info.');
+						$("#toolbar-loading").ajaxStop(function() {
+							$(this).hide();
+						});
 					}
 				},
 				success: function(result) {
@@ -630,25 +607,8 @@ var WayFinder = function() {
 					});
 				}
 			});
-
 			return false;
 		});
-
-		/*
-		$("#toolbar-markers").click(function() {
-			if ($("#toolbar-markers").is(":checked")) {
-				nodes.forEach(function(elem, index) {
-					elem.setDraggable(false);
-					google.maps.event.clearInstanceListeners(elem);
-				});
-			} else {
-				nodes.forEach(function(elem, index) {
-					elem.setDraggable(true);
-					addMarkerListeners(elem, true);
-				});
-			}
-		});
-		*/
 
 		$("#toolbar-paths").click(function() {
 			if ($("#toolbar-paths").is(":checked")) {
@@ -677,6 +637,10 @@ var WayFinder = function() {
 		});
 	})();
 
+	/**
+	 * autoComplete
+	 * jQuery UI autocomplete for test path
+	 */
 	(function autoComplete() {
 		$("#end").autocomplete({
 			source: "/labellist/",
@@ -726,8 +690,6 @@ var WayFinder = function() {
 				url: "/userauth/",
 				statusCode: {
 					403: function() {
-						//createLogWindow();
-						//$("#log-display").html("<span>Log in to edit map</span>");
 						$.jGrowl("Log in to edit map");
 					}
 				},

@@ -1,3 +1,6 @@
+/**
+ * WayFinderMobile
+ */
 var WayFinderMobile = function() {
 	var testPolylineOptions = {
 		strokeColor: "#FFE303",
@@ -38,9 +41,11 @@ var WayFinderMobile = function() {
 			data: data,
 			statusCode: {
 				404: function(result) {
+					$.mobile.hidePageLoadingMsg();
 					alert(result);
 				},
 				500: function() {
+					$.mobile.hidePageLoadingMsg();
 					alert('Server returned HTTP 500, use Firebug or Chrome JavaScript console for more info.');
 				}
 			},
@@ -106,7 +111,7 @@ var WayFinderMobile = function() {
 			);
 
 			var myOptions = {
-				zoom: 18,
+				zoom: 17,
 				center: latlng,
 				mapTypeId: google.maps.MapTypeId.SATELLITE
 			};
@@ -127,6 +132,10 @@ var WayFinderMobile = function() {
 			}
 		},
 
+		/**
+		 * haversine
+		 * @param Number points Lat/lng values
+		 */
 		haversine: function(lon1, lat1, lon2, lat2) {
 			var R = 3961; // miles
 			var dLat = (lat2-lat1).toRad();
@@ -220,20 +229,19 @@ var WayFinderMobile = function() {
 $("#two").live("pageshow", function() {
 	wMobile = WayFinderMobile();
 
-	if(navigator.geolocation) {
-
+	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(wMobile.initialize, wMobile.handleError, wMobile.options);
 		var watchID;
 
 		$("#mobile-track").click(function() {
 			//Checks position every 5 seconds
 			watchID = navigator.geolocation.watchPosition(wMobile.updatePosition, wMobile.handleError, {enableHighAccuracy: true});
-			alert("Position updates enabled");
+			//alert("Position updates enabled");
 		});
 
 		$("#mobile-track-stop").click(function() {
 			navigator.geolocation.clearWatch(watchID);
-			alert("Position updates disabled");
+			//alert("Position updates disabled");
 		});
 
 	} else {
