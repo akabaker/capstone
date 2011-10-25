@@ -15,7 +15,17 @@ var WayFinderMobile = function() {
 	};
 
 	var map = null;
+	var dest = null;
 	var previousMarker;
+
+	/** Converts numeric degrees to radians
+	 * Taken from http://www.movable-type.co.uk/scripts/latlong.html
+	 */
+	if (typeof(Number.prototype.toRad) === "undefined") {
+		Number.prototype.toRad = function() {
+			return this * Math.PI / 180;
+		}
+	}
 
 	/**
 	 * route
@@ -65,6 +75,8 @@ var WayFinderMobile = function() {
 				map.setCenter(centerLatLng);
 				testPath.setMap(map);
 
+				dest = result.returned_path.pop();
+
 				//Array of objects containing markerOptions for start/stop positions on the map
 				var routeMarkers = [{text: "Start", color: "00FF00", pos: path[0]},{text: "Stop", color: "FF0000", pos: path[path.length - 1]}];
 				for (var i = 0; i < routeMarkers.length; i++) {
@@ -95,6 +107,24 @@ var WayFinderMobile = function() {
 				$.mobile.hidePageLoadingMsg();
 			}
 		});
+	}
+
+	/**
+	 * haversine
+	 * @param Number points Lat/lng values
+	 */
+	function haversine(lon1, lat1, lon2, lat2) {
+		var R = 3961; // miles
+		var dLat = (lat2-lat1).toRad();
+		var dLon = (lon2-lon1).toRad();
+		var lat1 = lat1.toRad();
+		var lat2 = lat2.toRad();
+
+		var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+				Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+		var distance = R * c;
+		return distance
 	}
 
 	return {
@@ -133,37 +163,24 @@ var WayFinderMobile = function() {
 		},
 
 		/**
-		 * haversine
-		 * @param Number points Lat/lng values
-		 */
-		haversine: function(lon1, lat1, lon2, lat2) {
-			var R = 3961; // miles
-			var dLat = (lat2-lat1).toRad();
-			var dLon = (lon2-lon1).toRad();
-			var lat1 = lat1.toRad();
-			var lat2 = lat2.toRad();
-
-			var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-					Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
-			var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-			var distance = R * c;
-			return distance
-		},
-
-		/**
 		 * updatePosition
 		 * @param Object position Geolocation object
 		 */
 		updatePosition: function(position) {
-			/*
 			var distance = haversine(
 				position.coords.longitude,
 				position.coords.latitude,
 				dest[1],
 				dest[0]	
 			)
-			alert(distance);
-			*/
+	
+			//Distance is in miles - if distance is equal to or less than 25ft alert the user
+			if (distance <= 0.00473484848) {
+				alert("Destination reached");
+
+				//Stop position updates
+				$("#mobile-track-stop").trigger("click");
+			}
 
 			var latlng = new google.maps.LatLng(
 				position.coords.latitude,
