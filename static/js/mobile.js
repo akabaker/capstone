@@ -97,14 +97,8 @@ var WayFinderMobile = function() {
 				}
 
 				//Messy, but appends route travel data to DOM
-				/*
-				$("#route-details").html("<dl>"
-					+ "<dt>Distance:</dt>" + "<dd>" + result.distance + " miles</dd>"
-					+ " <dt>Walking Time:</dt>" + "<dd>" + result.walking_time  + " minutes</dd>"
-					+ "</dl>"
-				);
-				*/
-				$("#route-details").html("<div>Distance:" + result.distance + " miles</div>" + "<div>Time:" + result.walking_time + " minutes</div>");
+				$("#route-details").html("<div>Distance:" + result.distance 
+				+ " miles</div>" + "<div>Time:" + result.walking_time + " minutes</div>");
 
 				//Hide ajax loading message
 				$.mobile.hidePageLoadingMsg();

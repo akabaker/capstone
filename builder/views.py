@@ -89,11 +89,7 @@ def label_list(request):
 def mobile(request):
 	if request.method == 'GET':
 		dest_list = Nodes.objects.filter(label__isnull=False).order_by('label')
-		return render_to_response('mobile.html', {
-			'nodes': dest_list,
-		})
-
-		return HttpResponse(json.dumps(jsondata), mimetype='application/json')
+		return render_to_response('mobile.html', {'nodes': dest_list})
 
 @login_required
 def dest_list(request):
