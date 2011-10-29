@@ -20,6 +20,20 @@ import urllib
 import Pathfind
 
 #=== Helper functions ===#
+def haversine(lon1, lat1, lon2, lat2):
+	# convert decimal degrees to radians 
+	lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+	# haversine formula 
+	dlon = lon2 - lon1 
+	dlat = lat2 - lat1 
+	a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+	c = 2 * asin(sqrt(a)) 
+	#km = 6367 * c
+	#6367 radius of the earth in km
+	#3961 radius of the earth in miles
+	miles = 3961 * c
+	return miles
+
 def user_from_session_key(session_key):
     session_engine = __import__(settings.SESSION_ENGINE, {}, {}, [''])
     session_wrapper = session_engine.SessionStore(session_key)
@@ -57,18 +71,6 @@ def register(request):
         'form': form,
     })
 
-def save_or_load_map_state(request):
-	if request.method == 'POST':
-		jsondata = json.loads(request.raw_post_data)
-		request.session['map_state'] = jsondata
-		return HttpResponse(json.dumps(request.session['map_state']))
-	
-	if request.method == 'GET':
-		if "map_state" in request.session:
-			return HttpResponse(json.dumps(request.session['map_state']))
-		else:
-			raise Http404('none')
-
 #=== Django views ===#
 
 # Must render template with the correct RequestContext for access to user auth data
@@ -86,10 +88,24 @@ def label_list(request):
 
 		return HttpResponse(json.dumps(label_list), mimetype='application/json')
 
-def mobile(request):
+def closest_nodes(request):
 	if request.method == 'GET':
+		lat = request.GET.get('lat')
+		lng = request.GET.get('lng')
 		dest_list = Nodes.objects.filter(label__isnull=False).order_by('label')
-		return render_to_response('mobile.html', {'nodes': dest_list})
+		dests = []
+		for dest in dest_list:
+			d = haversine(float(lng), float(lat), dest.lng, dest.lat)
+			# Destinations within 2 miles
+			if d <= 2.0:
+				dests.append({
+					'lat': dest.lat,
+					'lng': dest.lng,
+					'label': dest.label,
+					'distance': d
+				})
+
+		return HttpResponse(json.dumps(dests), mimetype='application/json')
 
 @login_required
 def dest_list(request):
@@ -196,20 +212,6 @@ def create_path(request):
 
 		p.save()
 		return HttpResponse("node1: {0} node2: {1}".format(node1, node2))
-
-def haversine(lon1, lat1, lon2, lat2):
-	# convert decimal degrees to radians 
-	lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-	# haversine formula 
-	dlon = lon2 - lon1 
-	dlat = lat2 - lat1 
-	a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
-	c = 2 * asin(sqrt(a)) 
-	#km = 6367 * c
-	#6367 radius of the earth in km
-	#3961 radius of the earth in miles
-	miles = 3961 * c
-	return miles
 
 @csrf_exempt
 def find_path(request):

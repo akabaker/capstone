@@ -38,17 +38,11 @@
 					<!--<label for="mobile-start" class="select">Start:</label>-->
 					<select name="start" id="mobile-start">
 						<option data-placeholder="true" value="">Current Position</option>
-						{% for node in nodes %}	
-						<option value="{{ node.lat }},{{ node.lng }}">{{ node.label }}</option>
-						{% endfor %}
 					</select>
 					</li>
 					<li data-role="fieldcontain">
 					<!--<label for="mobile-end" class="select">Dest:</label>-->
 					<select name="end" id="mobile-end">
-						{% for node in nodes %}	
-						<option value="{{ node.label }}">{{ node.label }}</option>
-						{% endfor %}
 					</select>
 					</li>
 					<li data-role="fieldcontain">

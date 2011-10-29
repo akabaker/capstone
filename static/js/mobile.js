@@ -28,6 +28,25 @@ var WayFinderMobile = function() {
 	}
 
 	/**
+	 * addOptions
+	 * @param select
+	 * @param elem
+	 * Helper to add select option to an existing select menu
+	 */
+	function addOption(select, elem) {
+		var opt = document.createElement("option");
+		var start = document.getElementById("mobile-start");
+
+		if (select === start) {
+			opt.value = elem.lat + "," + elem.lng;
+		} else {
+			opt.value = elem.label;
+		}
+		opt.text = elem.label;
+		select.add(opt, null);
+	}
+
+	/**
 	 * route
 	 * @param String start Lat and lng of the starting position.
 	 * Performs ajax call to findpath.
@@ -159,6 +178,43 @@ var WayFinderMobile = function() {
 			}
 		},
 
+		getDestinations: function(position) {
+			var data = {
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			};
+
+			$.ajax({
+				type: "GET",
+				url: "/nearby/",
+				data: $.param(data),
+				statusCode: {
+					404: function(result) {
+						alert(result);
+					},
+					500: function() {
+						alert('Server returned HTTP 500, use Firebug or Chrome JavaScript console for more info.');
+					}
+				},
+				success: function(result) {
+					var startSelect = document.getElementById("mobile-start");
+					var endSelect = document.getElementById("mobile-end");
+					var resultLength = result.length;
+
+					for (var i = 0; i < resultLength; i++) {
+						addOption(startSelect, result[i]);
+						addOption(endSelect, result[i]);
+					}
+
+					endSelect.selectedIndex = 0;
+					$("#mobile-end").selectmenu("refresh");
+
+					//Hide ajax loading message
+					$.mobile.hidePageLoadingMsg();
+				}
+			});
+		},
+
 		/**
 		 * updatePosition
 		 * @param Object position Geolocation object
@@ -237,10 +293,24 @@ var WayFinderMobile = function() {
 };
 
 /**
+ * One page load
+ */
+$("#one").live("pageshow", function() {
+	wMobile = WayFinderMobile();
+
+	//Ajax loadeing
+	$.mobile.showPageLoadingMsg();
+
+	if (navigator.geolocation) {
+		navigator.geolocation.getCurrentPosition(wMobile.getDestinations, wMobile.handleError, wMobile.options);
+	} 
+});
+
+/**
  * When the map page is rendered, find the current position and initialize the map accoordingly
  */
 $("#two").live("pageshow", function() {
-	wMobile = WayFinderMobile();
+	//wMobile = WayFinderMobile();
 
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(wMobile.initialize, wMobile.handleError, wMobile.options);
