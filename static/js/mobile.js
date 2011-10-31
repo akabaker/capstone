@@ -9,14 +9,13 @@ var WayFinderMobile = function() {
 		zIndex: 500,
 		clickable: false
 	};
-
 	var markerOptions = {
 		icon: "/static/images/pedestriancrossing.png",
 	};
 
-	var map = null;
-	var dest = null;
-	var previousMarker;
+	var map = null,
+		dest = null,
+		previousMarker;
 
 	/** Converts numeric degrees to radians
 	 * Taken from http://www.movable-type.co.uk/scripts/latlong.html
@@ -33,7 +32,8 @@ var WayFinderMobile = function() {
 	 * @param elem
 	 * Helper to add select option to an existing select menu
 	 */
-	function addOption(select, elem) {
+	function addOption(select, elem, index) {
+		/*
 		var opt = document.createElement("option");
 		var start = document.getElementById("mobile-start");
 
@@ -44,6 +44,12 @@ var WayFinderMobile = function() {
 		}
 		opt.text = elem.label;
 		select.add(opt, null);
+		*/
+		var valueString = elem.lat + "," + elem.lng;
+		var optionValue = select.id === "mobile-start" ? valueString : elem.label;
+		var optionText = elem.label;
+		var optionString = "<option " + "value='" + optionValue + "'>" + optionText + "</option>";
+		return optionString;
 	}
 
 	/**
@@ -111,7 +117,7 @@ var WayFinderMobile = function() {
 									draggable: false
 								});
 
-					//marker.setMap(map);
+					//Fire resize event to size the map to the current viewport
 					google.maps.event.trigger(map, "resize");
 				}
 
@@ -127,7 +133,7 @@ var WayFinderMobile = function() {
 
 	/**
 	 * haversine
-	 * @param Number points Lat/lng values
+	 * @param {Number} points: Lat/lng values
 	 */
 	function haversine(lon1, lat1, lon2, lat2) {
 		var R = 3961; // miles
@@ -146,8 +152,8 @@ var WayFinderMobile = function() {
 	return {
 		/**
 		 * initialize
-		 * @param Object position Navigator geolocation object
-		 * @param Boolean geo Flag for hardware support of geolocation
+		 * @param {Object} position: Navigator geolocation object
+		 * @param {Boolean} geo: Flag for hardware support of geolocation
 		 * Create the map
 		 */
 		initialize: function(position) {
@@ -202,12 +208,25 @@ var WayFinderMobile = function() {
 					var startSelect = document.getElementById("mobile-start");
 					var endSelect = document.getElementById("mobile-end");
 					var resultLength = result.length;
+					var startOptions = "";
+					var endOptions = "";
 
 					for (var i = 0; i < resultLength; i++) {
-						addOption(startSelect, result[i]);
-						addOption(endSelect, result[i]);
+						startOptions += addOption(startSelect, result[i]);
+						endOptions += addOption(endSelect, result[i]);
 					}
 
+					$(startSelect).html(startOptions);
+					$(endSelect).html(endOptions);
+			
+					//Add default option to the DOM for the user's Current Position
+					var opt = document.createElement("option");
+					opt.value = "";
+					opt.text = "Current Position";
+					//Add the new option to the beginning of the options list
+					startSelect.add(opt, startSelect.options[0]);
+					//Ensure the first item in the list is selected by default
+					startSelect.selectedIndex = 0;
 					endSelect.selectedIndex = 0;
 					$("#mobile-end").selectmenu("refresh");
 
