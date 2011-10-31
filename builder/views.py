@@ -105,7 +105,10 @@ def closest_nodes(request):
 					'distance': d
 				})
 
-		return HttpResponse(json.dumps(dests), mimetype='application/json')
+		if len(dests) == 0:
+			return Http404
+		else:
+			return HttpResponse(json.dumps(dests), mimetype='application/json')
 
 @login_required
 def dest_list(request):
@@ -215,7 +218,7 @@ def create_path(request):
 
 @csrf_exempt
 def find_path(request):
-	AVG_WALKING_SPEED = 3.3
+	AVG_WALKING_SPEED = 3.4
 
 	if request.method == 'POST':
 		form = FindPath(request.POST)

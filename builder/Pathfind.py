@@ -3,7 +3,7 @@ import ValidatePoint
 def pathFind(start, end):
 	if (ValidatePoint.validate(start) > 0 and ValidatePoint.validate(end) > 0):
 		start = ValidatePoint.getPoint(start)
-		start[5] = ValidatePoint.getChildren(start)
+		start[5] = ValidatePoint.getChildren(start, [])
 		return calcPath(start,end)
 	else:
 		if (ValidatePoint.validate(start) < 0):
@@ -17,9 +17,11 @@ def calcPath(start, end):
 	start.append(0)
 	curNode = start
 	leaves = [curNode]
+	expandedNodes = []
 	while not ValidatePoint.isEqual(curNode, end):
 		leaves.remove(curNode)
-		curNode[5] = ValidatePoint.getChildren(curNode)
+		expandedNodes.append(curNode)
+		curNode[5] = ValidatePoint.getChildren(curNode, expandedNodes)
 		for node in curNode[5]:
 			node[3] = curNode[3] + ValidatePoint.calcDistance(node, curNode)
 			node[4] = ValidatePoint.calcDistance(node, end)

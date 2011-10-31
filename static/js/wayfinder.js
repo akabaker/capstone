@@ -13,7 +13,6 @@ var WayFinder = function() {
 		strokeColor: "#FF0000",
 		strokeOpacity: 1.0,
 		strokeWeight: 3,
-		zIndex: 200,
 		clickable: false
 	};
 	var testPolylineOptions = {

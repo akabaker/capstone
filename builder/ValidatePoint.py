@@ -13,18 +13,18 @@ def getPoint(point):
 	notDefined = 1
 	allNodes = Nodes.objects.filter(lat__lt=point[0]+.005, lat__gt=point[0]-.005, lng__lt=point[1]+.005, lng__gt=point[1]-.005)
 	for node in allNodes:
-		if notDefined:
+		if notDefined == 1:
 			p[0] = node.lat
 			p[1] = node.lng
 			p[2] = node.label
 			notDefined = 0
-		elif calcDistance(p, [node.lat, node.lng]) < calcDistance(p, point):
+		elif calcDistance(point, [node.lat, node.lng]) < calcDistance(p, point):
 			p[0] = node.lat
 			p[1] = node.lng
 			p[2] = node.label
 	return p
 
-def getChildren(point):
+def getChildren(point, excludedNodes):
 	nodes = Nodes.objects.get(lat=point[0],lng=point[1])
 	if not nodes:
 		return nodes
@@ -37,11 +37,17 @@ def getChildren(point):
 			otherNodes.append(path.node1)
 	points = []
 	for node in otherNodes:
-		p = [0,0,"",0,0,[]]
-		p[0] = node.lat
-		p[1] = node.lng
-		p[2] = node.label
-		points.append(p)
+		toAdd = 1
+		for exclude in excludedNodes:
+			if node.lat == exclude[0] and node.lng == exclude[1]:
+				toAdd = 0
+				break
+		if toAdd == 1:
+			p = [0,0,"",0,0,[]]
+			p[0] = node.lat
+			p[1] = node.lng
+			p[2] = node.label
+			points.append(p)
 	return points
 	
 def isEqual(point1, point2):

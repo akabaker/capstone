@@ -190,10 +190,12 @@ var WayFinderMobile = function() {
 				data: $.param(data),
 				statusCode: {
 					404: function(result) {
-						alert(result);
+						alert("Sorry, no destinations could be found!");
+						$.mobile.hidePageLoadingMsg();
 					},
 					500: function() {
 						alert('Server returned HTTP 500, use Firebug or Chrome JavaScript console for more info.');
+						$.mobile.hidePageLoadingMsg();
 					}
 				},
 				success: function(result) {
