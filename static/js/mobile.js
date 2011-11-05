@@ -33,18 +33,6 @@ var WayFinderMobile = function() {
 	 * Helper to add select option to an existing select menu
 	 */
 	function addOption(select, elem, index) {
-		/*
-		var opt = document.createElement("option");
-		var start = document.getElementById("mobile-start");
-
-		if (select === start) {
-			opt.value = elem.lat + "," + elem.lng;
-		} else {
-			opt.value = elem.label;
-		}
-		opt.text = elem.label;
-		select.add(opt, null);
-		*/
 		var valueString = elem.lat + "," + elem.lng;
 		var optionValue = select.id === "mobile-start" ? valueString : elem.label;
 		var optionText = elem.label;
@@ -67,7 +55,7 @@ var WayFinderMobile = function() {
 		//urlencode data object
 		var data = $.param(params);
 
-		//Ajax loadeing
+		//Ajax loading
 		$.mobile.showPageLoadingMsg();
 
 		$.ajax({
@@ -185,10 +173,13 @@ var WayFinderMobile = function() {
 		},
 
 		getDestinations: function(position) {
+
 			var data = {
 				lat: position.coords.latitude,
 				lng: position.coords.longitude
 			};
+
+			$(".position").html("<span>"+data.lat+","+data.lng+"</span>");
 
 			$.ajax({
 				type: "GET",
@@ -230,6 +221,8 @@ var WayFinderMobile = function() {
 					endSelect.selectedIndex = 0;
 					$("#mobile-end").selectmenu("refresh");
 
+					navigator.geolocation.clearWatch(watch);	
+
 					//Hide ajax loading message
 					$.mobile.hidePageLoadingMsg();
 				}
@@ -250,7 +243,6 @@ var WayFinderMobile = function() {
 	
 			//Distance is in miles - if distance is equal to or less than 25ft alert the user
 			if (distance <= 0.00473484848) {
-				//Stop position updates
 				$("#mobile-track-stop").trigger("click");
 				alert("Destination reached");
 			}
@@ -307,45 +299,42 @@ var WayFinderMobile = function() {
 		 */
 		options: {
 			enableHighAccuracy: true, //this should make the device provide geoposition data from GPS
-			timeout: 30000, //time out after 10 seconds
-			maximumAge: 120000 //only accept cached location that are 2 min old
+			timeout: 10000, //time out after 10 seconds
+			maximumAge: 0 //only accept cached location that are 2 min old
 		}
 	};
 };
 
-/**
- * One page load
- */
-$("#one").live("pageshow", function() {
-	wMobile = WayFinderMobile();
+// Watch ID global
+var watch = null;
 
-	//Ajax loadeing
-	$.mobile.showPageLoadingMsg();
-
+// On page load
+$(".firstpage").live("pageshow", function() {
+// Namespace global
+wMobile = WayFinderMobile();
 	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(wMobile.getDestinations, wMobile.handleError, wMobile.options);
-	} 
+		$.mobile.showPageLoadingMsg();
+		watch = navigator.geolocation.watchPosition(wMobile.getDestinations,wMobile.handleError,wMobile.options);
+	} else {
+		alert("Your browser does not support geolocation");
+	}
 });
 
 /**
  * When the map page is rendered, find the current position and initialize the map accoordingly
  */
 $("#two").live("pageshow", function() {
-	//wMobile = WayFinderMobile();
-
 	if (navigator.geolocation) {
 		navigator.geolocation.getCurrentPosition(wMobile.initialize, wMobile.handleError, wMobile.options);
 		var watchID;
 
 		$("#mobile-track").click(function() {
 			//Checks position every 5 seconds
-			watchID = navigator.geolocation.watchPosition(wMobile.updatePosition, wMobile.handleError, {enableHighAccuracy: true});
-			//alert("Position updates enabled");
+			watchID = navigator.geolocation.watchPosition(wMobile.updatePosition, wMobile.handleError, wMobile.options);
 		});
 
 		$("#mobile-track-stop").click(function() {
 			navigator.geolocation.clearWatch(watchID);
-			//alert("Position updates disabled");
 		});
 
 	} else {
