@@ -19,16 +19,9 @@
 		{% if user.is_authenticated %}
 			<h5 class="toolbarheader">Map Utilities</h5>
 			<button id="toolbar-clear">Clear Map</button>
-			<!--
-			<div class="toolbar-checkbox">
-				<input type="checkbox" id="toolbar-markers" /><label for="toolbar-markers">Toggle Markers</label>
-			</div>
-			-->
 			<div class="toolbar-checkbox">
 				<input type="checkbox" id="toolbar-paths" /><label for="toolbar-paths">Hide Paths</label>
 			</div>
-			<!--<input type="checkbox" id="toolbar-edit" /><label for="toolbar-edit">Edit</label>-->
-			<!--<button id="toolbar-save">Save State</button>-->
 
 			{% include 'findpathform.html' %}
 
@@ -64,7 +57,7 @@
 	<div id='geocode-container' class='ui-widget-header'>
 		<span>Look up a location:</span>
 		<input id='geocode-address' class='input-search' type='textbox' onkeydown='if (event.keyCode == 13) $("#geocode-btn").click()'>
-		<button id='geocode-btn'>Go</button>
+		<button id='geocode-btn' class="tour_1">Go</button>
 	</div>
 	<div id='map-canvas' class='ui-helper-clearfix'></div>
 {% endblock %}

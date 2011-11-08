@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Folder>
+    <GroundOverlay>
+      <Icon>
+        <href>http://wayfinder-dev.group9.us/static/classic.png</href>
+      </Icon>
+      <LatLonBox>
+        <north>38.9099628138052864</north>
+        <south>38.8885196489804059</south>
+        <east>-77.0120417327671021</east>
+        <west>-77.0498227545594006</west>
+        <rotation>0</rotation>
+      </LatLonBox>
+    </GroundOverlay>
+  </Folder>
+</kml>

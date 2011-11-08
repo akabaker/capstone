@@ -1,0 +1,111 @@
+@charset "UTF-8";
+/*
+ * EmbeddedHelp v1.1.3 - jQuery help plugin
+ * file: jquery.ehelp.css
+ * Copyright (c) 2010 Josip Kalebic
+ * josip.kalebic@gmail.com, www.embedded-help.net
+ *
+ * Dual licensed under the MIT and GPL licenses:
+ * 	http://www.opensource.org/licenses/mit-license.php
+ * 	http://www.gnu.org/licenses/gpl.html
+ *
+*/
+html,body {padding:0; margin:0; }
+
+.EHmarker { border:2px solid #FF0000; }
+
+#EHhelpBox { position:relative; padding:5px 10px 10px 10px; }
+#EHhelpBox .title { color:red; }
+#EHhelpBox a { color:#fff; text-decoration:none; }
+#EHhelpBox a:hover { color:red; text-decoration:none; }
+
+#EHpointer { width:32px; height:32px; position:absolute;
+          left:0px; top:0px; cursor:pointer; display:none;
+	  background:transparent url('cursor.png') 0 0 no-repeat; z-index:100; }
+
+#EHtooltip {
+	position:absolute;
+	border:1px solid #333;
+	background:#f7f5d1;
+	padding:2px 5px;
+	color:#333;
+	display:none;
+	font-size:11px;
+	z-index:101;
+	}
+
+.EHtooltipc {
+	position:absolute;
+	border:1px solid #333;
+	background:#f7f5d1;
+	padding:0;
+	margin:0;
+	color:#333;
+	display:block;
+	font-size:11px;
+	line-height:11px;
+	z-index:101;
+	width:auto;
+	}
+
+.EHtooltipc:hover { z-index:102; }
+	
+.EHtooltipc span { 
+    background-color: #FF0000;
+    border: 2px solid white;
+    color: white;
+    float: left;
+    margin: 0;
+    padding: 2px 4px;
+    position: relative;
+ }
+
+.EHtooltmp {
+	position:absolute;
+	border:1px solid #333;
+	background:#f7f5d1;
+	padding:0;
+	margin:0;
+	color:#333;
+	display:block;
+	font-size:11px;
+	line-height:11px;
+	z-index:101;
+	}
+
+.EHtooltmp p { margin:0; display:block; position:relative; float:left; padding:3px; width:auto; }
+
+.EHtooltmp a.EHclose {     background-color: #FF0000;
+    border: 2px solid white;
+    color: white;
+    float: left;
+    margin: 0;
+    padding: 2px 4px;
+    position: relative;
+    font-weight:bold; 
+    display:block; 
+}
+
+.EHtoolgost {
+	position:absolute;
+	border:1px solid #999;
+	background:#eee;
+	padding:0;
+	margin:0;
+	color:#666;
+	display:none;
+	font-size:11px;
+	line-height:11px;
+	z-index:101;
+	}
+
+.EHtoolgost span { 
+    background-color: #eee;
+    border: 2px solid white;
+    color: #666;
+    float: left;
+    margin: 0;
+    padding: 2px 4px;
+    position: relative;
+ }
+

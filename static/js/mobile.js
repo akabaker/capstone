@@ -110,8 +110,8 @@ var WayFinderMobile = function() {
 				}
 
 				//Messy, but appends route travel data to DOM
-				$("#route-details").html("<div>Distance:" + result.distance 
-				+ " miles</div>" + "<div>Time:" + result.walking_time + " minutes</div>");
+				$("#route-details").html("<div>Distance: " + result.distance 
+				+ " miles</div>" + "<div>Time: " + result.walking_time + " minutes</div>");
 
 				//Hide ajax loading message
 				$.mobile.hidePageLoadingMsg();
@@ -146,8 +146,10 @@ var WayFinderMobile = function() {
 		 */
 		initialize: function(position) {
 			var latlng = new google.maps.LatLng(
-				position.coords.latitude,
-				position.coords.longitude
+				//position.coords.latitude,
+				//position.coords.longitude
+				position.lat,
+				position.lng
 			);
 
 			var myOptions = {
@@ -167,24 +169,24 @@ var WayFinderMobile = function() {
 				start = $("#mobile-start").val();
 				route(start);
 			} else {
-				start = position.coords.latitude + "," + position.coords.longitude;
+				//start = position.coords.latitude + "," + position.coords.longitude;
+				start = position.lat + "," + position.lng;
 				route(start);
 			}
 		},
 
 		getDestinations: function(position) {
-
-			var data = {
+			origin = {
 				lat: position.coords.latitude,
 				lng: position.coords.longitude
 			};
 
-			$(".position").html("<span>"+data.lat+","+data.lng+"</span>");
+			$(".position").html("<span>"+origin.lat+","+origin.lng+"</span>");
 
 			$.ajax({
 				type: "GET",
 				url: "/nearby/",
-				data: $.param(data),
+				data: $.param(origin),
 				statusCode: {
 					404: function(result) {
 						alert("Sorry, no destinations could be found!");
@@ -307,6 +309,8 @@ var WayFinderMobile = function() {
 
 // Watch ID global
 var watch = null;
+// Initial position global
+var origin = {};
 
 // On page load
 $(".firstpage").live("pageshow", function() {
@@ -325,7 +329,8 @@ wMobile = WayFinderMobile();
  */
 $("#two").live("pageshow", function() {
 	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(wMobile.initialize, wMobile.handleError, wMobile.options);
+		//navigator.geolocation.getCurrentPosition(wMobile.initialize, wMobile.handleError, wMobile.options);
+		wMobile.initialize(origin);
 		var watchID;
 
 		$("#mobile-track").click(function() {

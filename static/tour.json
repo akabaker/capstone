@@ -1,0 +1,12 @@
+[
+	{
+		'rel':'rel_name',
+		'method':'static or animated',
+		'path': [{
+			'element': 'jquery selector',
+			'desc': 'Help content (text)',
+			'duration': number in ms,
+			'marker': 'class to mark element on page'
+		}]
+	},
+];

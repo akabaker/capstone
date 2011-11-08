@@ -578,6 +578,7 @@ var WayFinder = function() {
 					for (var i = 0; i < resultLength; i++) {
 						var latlng = new google.maps.LatLng(result.returned_path[i][0], result.returned_path[i][1]);
 						path.push(latlng);
+						console.log(result.returned_path[i][0], result.returned_path[i][1]);
 					}
 
 					testPolylineOptions.path = path;
@@ -760,6 +761,12 @@ $(function() {
 			width: 'hide'
 		};
 	}
+
+	$.getJSON("/static/tour.json",
+	function(data) {
+		console.log('hi');
+		console.log(data);	
+	});
 
 	wayfinder = WayFinder();
 	wayfinder.init();	
