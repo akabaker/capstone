@@ -1,12 +1,12 @@
-[
-	{
-		'rel':'rel_name',
-		'method':'static or animated',
-		'path': [{
-			'element': 'jquery selector',
-			'desc': 'Help content (text)',
-			'duration': number in ms,
-			'marker': 'class to mark element on page'
-		}]
-	},
-];
+{
+    "rel": "path_1",
+    "method": "static",
+    "path": [
+        {
+            "element": "#geocode-btn",
+            "desc": "Make sure to clear all previus search",
+            "duration": 2000,
+            "marker": "tourbox"
+        }
+    ]
+}

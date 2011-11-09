@@ -18,7 +18,7 @@
 		<div id="toolbar-buttons" class="toolbar">
 		{% if user.is_authenticated %}
 			<h5 class="toolbarheader">Map Utilities</h5>
-			<button id="toolbar-clear">Clear Map</button>
+			<button id="toolbar-clear">Clear Map</button><span class="fright help ui-icon ui-icon-help"></span>
 			<div class="toolbar-checkbox">
 				<input type="checkbox" id="toolbar-paths" /><label for="toolbar-paths">Hide Paths</label>
 			</div>
@@ -28,7 +28,7 @@
 			<!-- start jquery template -->
 			<div id="toolbar-pathstatslist"></div>
 			<script id="toolbar-pathstats" type="text/x-jquery-tmpl">
-			<h5 class="toolbarheader">Test Path Stats</h5>
+			<h5 class="toolbarheader">Test Path Stats</h5> 
 				<dl class="pathlist">
 					<dt>Time to calculate path:</dt>
 						<dd>${timeToFind} seconds</dd>

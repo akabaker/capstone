@@ -712,29 +712,35 @@ var WayFinder = function() {
 			}
     	});
 
-    	$("#toolbar-clear").qtip({
-    		content: "Delete all nodes and paths",
-    		position: {
-    			my: "left center",
-    			at: "right center",
-    			target: $("#toolbar-clear")
+    	// Tooltips using the qtip library
+    	// The target element is the next element after "elem". In this case, the next element will
+    	// always be the "help" icon.
+    	var tooltips = [
+    		{
+    			elem: $("#toolbar-clear"),
+    			content: "Delete all nodes and paths",
+    			target: $("#toolbar-clear").next()
 			},
-    		style: {
-    			classes: "ui-tooltip-red, ui-tooltip-rounded"
+    		{
+    			elem: $("#toolbar-startpoint"),
+    			content: "Place start point for pathfinding test",
+    			target: $("#toolbar-startpoint").next()
 			}
-		});
+    	];
 
-    	$("#toolbar-startpoint").qtip({
-    		content: "Place start point for pathfinding test",
-    		position: {
-    			my: "left center",
-    			at: "right center",
-    			target: $("#toolbar-startpoint")
-			},
-    		style: {
-    			classes: "ui-tooltip-red, ui-tooltip-rounded"
-			}
-		});
+		for (var i = 0; i < tooltips.length; i++) {
+			tooltips[i].target.qtip({
+				content: tooltips[i].content,
+				position: {
+					my: "left center",
+					at: "right center",
+					target: tooltips[i].target
+				},
+				style: {
+					classes: tooltips[i].classes || "ui-tooltip-red, ui-tooltip-rounded"
+				}
+			});
+		}
 	}
 
 	/**
@@ -761,12 +767,6 @@ $(function() {
 			width: 'hide'
 		};
 	}
-
-	$.getJSON("/static/tour.json",
-	function(data) {
-		console.log('hi');
-		console.log(data);	
-	});
 
 	wayfinder = WayFinder();
 	wayfinder.init();	

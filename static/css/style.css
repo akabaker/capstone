@@ -256,6 +256,14 @@ th {
 	text-align: center;
 }
 
+.tourbox {
+	border: 2px solid red;
+}
+
+.help {
+	margin-right: 55px;
+}
+
 /* End utilities */
 
 /* jQuery UI Overrides */
