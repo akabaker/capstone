@@ -17,8 +17,8 @@
 		</div>
 		<div id="toolbar-buttons" class="toolbar">
 		{% if user.is_authenticated %}
-			<h5 class="toolbarheader">Map Utilities</h5>
-			<button id="toolbar-clear">Clear Map</button><span class="fright help ui-icon ui-icon-help"></span>
+			<h5 class="toolbarheader">Map Utilities<span class="fright help ui-icon ui-icon-help"></span></h5>
+			<button id="toolbar-clear">Clear Map</button>
 			<div class="toolbar-checkbox">
 				<input type="checkbox" id="toolbar-paths" /><label for="toolbar-paths">Hide Paths</label>
 			</div>
@@ -42,7 +42,7 @@
 			</script>
 			<!-- end jquery template -->
 
-			<h5 class="toolbarheader">Destinations</h5>
+			<h5 class="toolbarheader">Destinations<span class="fright help ui-icon ui-icon-help"></span></h5>
 			<div id="toolbar-destlist">
 			</div>
 

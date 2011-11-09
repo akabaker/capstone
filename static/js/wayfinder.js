@@ -718,13 +718,19 @@ var WayFinder = function() {
     	var tooltips = [
     		{
     			elem: $("#toolbar-clear"),
-    			content: "Delete all nodes and paths",
-    			target: $("#toolbar-clear").next()
+    			content: "Delete all nodes and paths.",
+    			target: $("#toolbar-clear").prev()
 			},
     		{
     			elem: $("#toolbar-startpoint"),
-    			content: "Place start point for pathfinding test",
-    			target: $("#toolbar-startpoint").next()
+    			content: "Path finding test. Place and drag the start marker to the desired location, then type "
+    			+ "in a destination and click run.",
+    			target: $("#toolbar-startpoint").prev()
+			},
+    		{
+    			elem: $("#toolbar-destlist"),
+    			content: "Destination nodes list. Click a destination to set jump to that location on the map.",
+    			target: $("#toolbar-destlist").prev()
 			}
     	];
 

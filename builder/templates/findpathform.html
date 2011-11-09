@@ -1,4 +1,4 @@
-<h5 class="toolbarheader">Test Path Finding</h5>
+<h5 class="toolbarheader">Test Path Finding<span class="fright help ui-icon ui-icon-help"></span></h5>
 {% if form.errors %}
 	<p style="color: red;">
 		Please correct the error{{ form.errors|pluralize }} below.
@@ -6,7 +6,7 @@
 {% endif %}
 
 
-<button id="toolbar-startpoint">Place Start</button><span class="fright help ui-icon ui-icon-help"></span>
+<button id="toolbar-startpoint">Place Start</button>
 <form action="" id="toolbar-findpath" method="post">
 	<div class="field">
 		<label for="id_start">Start:</label>

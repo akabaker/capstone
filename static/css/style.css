@@ -126,6 +126,7 @@ body {
 	margin: 35px 0px 4px 0px;
 	/*font-size: 0.9em;*/
 	font-size: 11px;
+	width: 100px;
 }
 
 #toolbar-useraccess {
@@ -150,6 +151,7 @@ body {
 
 #toolbar-destlist {
 	height: 225px;
+	width: 100%;
 	overflow: auto;
 }
 
@@ -261,7 +263,9 @@ th {
 }
 
 .help {
-	margin-right: 55px;
+	position: relative;
+	top: -4px;
+/*	margin-right: 55px;*/
 }
 
 /* End utilities */
