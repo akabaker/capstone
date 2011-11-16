@@ -550,7 +550,9 @@ var WayFinder = function() {
 			setStartPoint();
 		});
 
-		$("#toolbar-run").button().click(function() {
+		$("#toolbar-run").button();
+		//$("#toolbar-run").button().click(function() {
+		$("#toolbar-findpath").submit(function(event) {
 			var data = $("#toolbar-findpath").serialize();
 			
 			$("#toolbar-loading").ajaxStart(function() {
@@ -601,6 +603,7 @@ var WayFinder = function() {
 					};
 
 					$("#toolbar-pathstatslist").html($("#toolbar-pathstats").tmpl(pathStats));
+					$("#toolbar-pathstatslist").effect("highlight", {}, 3000);
 
 					$("#toolbar-loading").ajaxStop(function() {
 						$(this).hide();

@@ -4,7 +4,18 @@
 	Development
 {% endblock %}
 
+{% block header %}
+{% endblock %}
+
 {% block aside %}
+	<header id="header">
+	<h1>
+		<a href="#">Wayfinder</a>
+	</h1>
+	{% if user.is_authenticated %}
+		<span id="welcome" class="ui-helper-clearfix">Logged in as <span style="font-style:italic">{{ user.username }}<span></span>
+	{% endif %}
+	</header>
 	<div class="toolbar">
 		<div id="toolbar-useraccess">
 		{% if user.is_authenticated %}
