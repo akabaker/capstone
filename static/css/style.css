@@ -7,8 +7,9 @@ body {
 #header {
 	color: #FFFFFF;
 	background-color: #333333;
-	border-top 1px solid #F1F1F1;
-	padding: 7px;
+	/*border-top 1px solid #F1F1F1;*/
+	/*padding: 7px;*/
+	height: 45px;
 }
 
 #header a {
@@ -17,8 +18,15 @@ body {
 }
 
 #header h1 {
-	margin: 10px 0 5px 10px;
-	width: 200px;
+	/*margin: 10px 0 5px 10px;*/
+	margin-left: 18px;
+	padding: 8px;
+	/*width: 200px;*/
+	line-height: 125%;
+	text-align: left;
+	background-image: url('/static/images/surveying-2.png');
+	background-repeat: no-repeat;
+	background-position: 70% 50%;
 }
 
 #welcome {

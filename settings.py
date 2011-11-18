@@ -20,6 +20,10 @@ DATABASES = {
         'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    },
+    'test': {
+    	'TEST_ENGINE': 'sqlite3',
+    	'TEST_NAME': '/tmp/test_wayfinder_dev.db',
     }
 }
 
@@ -168,3 +172,10 @@ try:
 	from local_settings import *
 except ImportError:
 	pass
+
+import sys
+if 'test' in sys.argv:
+	try: 
+		from test_settings import *
+	except ImportError:
+		pass

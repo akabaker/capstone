@@ -162,7 +162,7 @@ var WayFinderMobile = function() {
 
 			/*
 			 * If the start position is set to something besides "Current Position", use that value.
-			 * Otherwise, use the lat and lng provide by the GPS device.
+			 * Otherwise, use the lat and lng provided by the GPS device.
 			 */
 			var start;
 			if ($("#mobile-start").val()) {
@@ -318,7 +318,9 @@ $(".firstpage").live("pageshow", function() {
 wMobile = WayFinderMobile();
 	if (navigator.geolocation) {
 		$.mobile.showPageLoadingMsg();
-		watch = navigator.geolocation.watchPosition(wMobile.getDestinations,wMobile.handleError,wMobile.options);
+		//setTimeout(function() {
+			watch = navigator.geolocation.watchPosition(wMobile.getDestinations,wMobile.handleError,wMobile.options);
+		//},500);
 	} else {
 		alert("Your browser does not support geolocation");
 	}

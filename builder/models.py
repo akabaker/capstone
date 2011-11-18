@@ -10,10 +10,6 @@ class Nodes(models.Model):
 
 	lat = models.FloatField()
 	lng = models.FloatField()
-	#lat = models.DecimalField(max_digits=16, decimal_places=14)
-	#lng = models.DecimalField(max_digits=16, decimal_places=14)
-	#lat = models.DecimalField(max_digits=8, decimal_places=6)
-	#lng = models.DecimalField(max_digits=8, decimal_places=6)
 	label = models.CharField(max_length=100, null=True, unique=True)
 
 	def __unicode__(self):

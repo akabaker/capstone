@@ -118,12 +118,20 @@ def dest_list(request):
 
 @user_passes_test(lambda u: u.has_perm('builder.add_nodes'))
 def load_nodes(request):
+	"""Loads nodes using Django serializer
+
+	Returns:
+	jsondata -- json object containing a list of node objects
+
+	"""
+
 	jsondata = serializers.serialize('json', Nodes.objects.all(), fields=('lat','lng','label'))
 	return HttpResponse(json.dumps(jsondata), mimetype='application/json')
 
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.add_nodes'))
 def update_node(request):
+	"""Update label property for node (a labeled node is considered a destination)"""
 	if request.method == 'POST':
 		coords = request.POST.get('coords')	
 		lat = coords.split(',')[0]
@@ -155,6 +163,7 @@ def update_node(request):
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.delete_nodes'))
 def delete_node(request):
+	"""Delete a single node"""
 	if request.method == 'POST':
 		coords = request.POST.get('coords')
 		lat = coords.split(',')[0]
@@ -165,6 +174,7 @@ def delete_node(request):
 
 @csrf_exempt
 def clear_map(request):
+	"""Deletes all paths and nodes"""
 	perm_list = ['builder.delete_nodes', 'builder.delete_paths']
 	if request.user.is_authenticated() and request.user.has_perms(perm_list):
 		p = Paths.objects.all()
@@ -179,6 +189,16 @@ def clear_map(request):
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.add_nodes'))
 def create_node(request):
+	"""Saves node to Nodes model
+
+	Arguments:
+	request.POST.coords -- lat,lng pair of the new node
+
+	Returns:
+	success message (string)
+
+	"""
+
 	if request.method == 'POST':
 		coords = request.POST.get('coords')
 		lat = coords.split(',')[0]
@@ -190,17 +210,32 @@ def create_node(request):
 		)
 
 		n.save()
-		return HttpResponse('node created')
+		return HttpResponse('node created', context_instance=RequestContext(request))
 
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.add_paths'))
 def load_paths(request):
+	"""Use Django serializer to dump paths as json. Use_natural_keys calls the
+	Paths manager to serialize only lat,lng and not the pk of each row.
+	"""
+
 	jsondata = serializers.serialize('json', Paths.objects.all(), use_natural_keys=True)
 	return HttpResponse(json.dumps(jsondata), mimetype='application/json')
 
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.add_paths'))
 def create_path(request):
+	"""Inserts a pair of lat,lng coords into Paths
+
+	Arguments:
+	request.POST.node1 -- lat,lng pair of path's first node
+	request.POST.node2 -- lat,lng pair of path's seconds node
+
+	Returns:
+	Node1 and node2 coordinates (string)
+
+	"""
+
 	if request.method == 'POST':
 		pathNode1 = request.POST.get('node1')
 		pathNode2 = request.POST.get('node2')
@@ -218,6 +253,18 @@ def create_path(request):
 
 @csrf_exempt
 def find_path(request):
+	"""Take user starting position, destination and calculate shortest path
+
+	Arguments:
+	request.POST.start -- contains lat,lng pair of the starting position
+	request.POST.end -- contains the name of the destination (node label)
+
+	Returns:
+	path_data -- json encoded list object. contains the route length, time to traverse route
+	and the list of lat,lng pairs (path)
+
+	"""
+
 	AVG_WALKING_SPEED = 3.4
 
 	if request.method == 'POST':
@@ -233,11 +280,11 @@ def find_path(request):
 
 			end_node = Nodes.objects.get(label=cd['end'])
 	
-			#This function call should return the polyline to be drawn
 			start = [float(start_node['lat']), float(start_node['lng'])]
 			end = [end_node.lat, end_node.lng]
 			try:
 				start_time = time.time()
+				#This function call returns the polyline to be drawn
 				path = Pathfind.pathFind(start, end)
 			except RuntimeError:
 				return Http404('Unable to find path')
@@ -257,10 +304,15 @@ def find_path(request):
 
 				#Add our starting location to the front of the list
 				returnedPath.insert(0, start)
+
+				#Calculate the distance from the user's starting position to the first node and add to the distance value
 				d += haversine(returnedPath[0][1],returnedPath[0][0], returnedPath[1][1], returnedPath[1][0])
+
 				path_data['returned_path'] = returnedPath	
+
 				#Distance traversed from the users location to the end node
 				path_data['distance'] = round(d, 3)
+
 				#Estimated walking time in minutes
 				path_data['walking_time'] = round((path_data['distance'] / AVG_WALKING_SPEED) * 60, 2)
 				return HttpResponse(json.dumps(path_data), mimetype='application/json')

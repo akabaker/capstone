@@ -82,18 +82,14 @@ var Map = function() {
 		var mapZoom;
 		var latlng = new google.maps.LatLng(lat, lng);
 
-		//if ($.cookie('mapCenter')) {
 		if (localStorage.mapCenter) {
-			//var parsedLatLng = JSON.parse($.cookie('mapCenter'));
 			var parsedLatLng = JSON.parse(localStorage.mapCenter);
 			center = new google.maps.LatLng(parsedLatLng.lat, parsedLatLng.lng);
 		} else {
 			center = latlng;
 		}
 
-		//if ($.cookie('mapZoom')) {
 		if (localStorage.mapZoom) {
-			//mapZoom = JSON.parse($.cookie('mapZoom'));
 			mapZoom = JSON.parse(localStorage.mapZoom);
 		} else {
 			mapZoom = zoom;	
@@ -114,13 +110,11 @@ var Map = function() {
 				lng: map.getCenter().lng(),
 			};
 
-			//$.cookie('mapCenter', JSON.stringify(mapCenter));
 			localStorage.mapCenter = JSON.stringify(mapCenter);
 		});
 
 		google.maps.event.addListener(map, "zoom_changed", function() {
 			var mapZoom = map.getZoom();
-			//$.cookie('mapZoom', JSON.stringify(map.getZoom()));
 			localStorage.mapZoom = JSON.stringify(map.getZoom());
 		});
 
