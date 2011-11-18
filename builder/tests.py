@@ -1,8 +1,10 @@
 from django.test import TestCase
 from django.test.client import Client
 from django.contrib.auth.models import User
+from django.utils import simplejson as json
 from wayfinder.builder.models import Nodes
 from wayfinder.builder.models import Paths
+import random
 
 class SimplePageTests(TestCase):
 	fixtures = ['builder.json']
@@ -24,9 +26,25 @@ class SimplePageTests(TestCase):
 class TestPathFinding(TestCase):
 	fixtures = ['builder.json']
 
+	def setUp(self):
+		self.map_bounds = {'sw': (38.941116097466704, -92.33584062420618), 'ne': (38.94759137139376, -92.31609956585658)}
+		self.campus_coords = (38.94617, -92.32866)
+
 	def test_findpath(self):
-		response = self.client.post('/findpath/', {'start': '38.94617,-92.32866', 'end': 'EBW'})
-		self.assertEqual(response.status_code, 200)
+		sw_lat = self.map_bounds['sw'][0]
+		sw_lng = self.map_bounds['sw'][1]
+		destinations = json.loads(self.client.get('/nearby/', {'lat': self.campus_coords[0], 'lng': self.campus_coords[1]}).content)
+		destinations_len = len(destinations)
+		
+		while sw_lat <= self.map_bounds['ne'][0] and sw_lng < self.map_bounds['ne'][1]:
+			sw_lat += .00005
+			sw_lng += .00005
+			random_index = random.randrange(0,destinations_len,1)
+			dest = destinations[random_index]['label']
+			response = self.client.post('/findpath/', {'start': '{0},{1}'.format(sw_lat,sw_lng), 'end': dest})
+			path = json.loads(response.content)
+			print "Destination:{0} Distance:{1} TimeToFind:{2}".format(dest,path['distance'],path['time_to_find'])
+			self.assertLessEqual(path['time_to_find'], 2.0)
 
 class TestNodes(TestCase):
 	fixtures = ['builder.json']
@@ -82,4 +100,6 @@ class TestPaths(TestCase):
 		self.assertEqual(p.node2, node2)
 	
 	def test_delete_path(self):
-		pass
+		p = Paths.objects.all()
+		p.delete()
+		self.assertFalse(p)

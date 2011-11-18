@@ -116,6 +116,7 @@ var Map = function() {
 		google.maps.event.addListener(map, "zoom_changed", function() {
 			var mapZoom = map.getZoom();
 			localStorage.mapZoom = JSON.stringify(map.getZoom());
+			//console.log(map.getBounds().toString());
 		});
 
 		map.enableKeyDragZoom();
