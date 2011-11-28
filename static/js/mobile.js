@@ -314,8 +314,9 @@ var origin = {};
 
 // On page load
 $(".firstpage").live("pageshow", function() {
-// Namespace global
-wMobile = WayFinderMobile();
+	window.scrollTo(0,1);
+	// Namespace global
+	wMobile = WayFinderMobile();
 	if (navigator.geolocation) {
 		$.mobile.showPageLoadingMsg();
 		//setTimeout(function() {
@@ -330,6 +331,7 @@ wMobile = WayFinderMobile();
  * When the map page is rendered, find the current position and initialize the map accoordingly
  */
 $("#two").live("pageshow", function() {
+	window.scrollTo(0,1);
 	if (navigator.geolocation) {
 		//navigator.geolocation.getCurrentPosition(wMobile.initialize, wMobile.handleError, wMobile.options);
 		wMobile.initialize(origin);

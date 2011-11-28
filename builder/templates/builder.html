@@ -14,7 +14,7 @@
 	</h1>
 	{% comment %}
 	{% if user.is_authenticated %}
-		<span id="welcome" class="ui-helper-clearfix">Logged in as <span style="font-style:italic">{{ user.username }}<span></span>
+		<span id="welcome" class="ui-helper-clearfix">Logged in as <span style="font-style:italic">{{ user.username }}</span></span>
 	{% endif %}
 	{% endcomment %}
 	</header>
@@ -35,8 +35,27 @@
 			<div class="toolbar-checkbox">
 				<input type="checkbox" id="toolbar-paths" /><label for="toolbar-paths">Hide Paths</label>
 			</div>
+			<div class="toolbar-checkbox">
+				<input type="checkbox" id="toolbar-markers" /><label for="toolbar-markers">Hide Markers</label>
+			</div>
 
 			{% include 'findpathform.html' %}
+
+			<div id="clearmap-dialog" title="Clear all markers and paths?">
+				<p>
+					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+					All markers and paths will be permanently deleted and cannot be recovered. Are you sure?
+				</p>
+			</div>
+
+			<div id="editnode-dialog" title="Create destination">
+				<form action="" id="editnode-form" method="post">
+					<div class="field">
+						<label for="label">Destination Name:</label>
+						<input type="text" name="label" maxlength="100" id="label" required="required" placeholder="destination name"/>
+					</div>
+				</form>
+			</div> <!-- edit node modal dialog -->
 
 			<!-- start jquery template -->
 			<div id="toolbar-pathstatslist"></div>
@@ -68,6 +87,9 @@
 
 {% block main-content %}
 	<div id='geocode-container' class='ui-widget-header'>
+		{% if user.is_authenticated %}
+			<span id="welcome" class="ui-helper-clearfix">Logged in as {{user.username}}</span>
+		{% endif %}
 		<span>Look up a location:</span>
 		<input id='geocode-address' class='input-search' type='textbox' onkeydown='if (event.keyCode == 13) $("#geocode-btn").click()'>
 		<button id='geocode-btn' class="tour_1">Go</button>

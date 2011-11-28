@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import AnonymousUser
 from django.core import serializers
 from wayfinder.builder.models import Nodes, Paths
-from wayfinder.builder.forms import FindPath
+from wayfinder.builder.forms import FindPath, UpdateNode
 from numpy import sin, cos, sqrt, radians, arctan2, ceil
 import time
 from math import asin
@@ -23,7 +23,6 @@ import Pathfind
 def haversine(lon1, lat1, lon2, lat2):
 	# convert decimal degrees to radians 
 	lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
-	# haversine formula 
 	dlon = lon2 - lon1 
 	dlat = lat2 - lat1 
 	a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
@@ -58,6 +57,11 @@ def user_authenticated(request):
 			return HttpResponse('is')
 		else:
 			return HttpResponseForbidden()
+#=== Django views ===#
+
+# Must render template with the correct RequestContext for access to user auth data
+def builder(request):
+	return render_to_response('builder.html', context_instance=RequestContext(request))
 
 def register(request):
     if request.method == 'POST':
@@ -70,12 +74,6 @@ def register(request):
     return render_to_response('registration/register.html', {
         'form': form,
     })
-
-#=== Django views ===#
-
-# Must render template with the correct RequestContext for access to user auth data
-def builder(request):
-	return render_to_response('builder.html', context_instance=RequestContext(request))
 
 @login_required
 def label_list(request):
@@ -133,32 +131,49 @@ def load_nodes(request):
 def update_node(request):
 	"""Update label property for node (a labeled node is considered a destination)"""
 	if request.method == 'POST':
-		coords = request.POST.get('coords')	
-		lat = coords.split(',')[0]
-		lng = coords.split(',')[1]
-		if request.POST.get('label') == "":
-			label = None
-		else:
-			label = request.POST.get('label')
+		form = UpdateNode(request.POST)
 
-		n = Nodes.objects.filter(lat=lat, lng=lng)
+		if form.is_valid():
+			cd = form.cleaned_data
 
-		if not n:
-			n = Nodes(
-				lat = lat,
-				lng = lng,
-				label = request.POST.get('label')
-			)
-			n.save()
-			return HttpResponse('node created')
+			coords = request.POST.get('coords')	
+			lat = coords.split(',')[0]
+			lng = coords.split(',')[1]
 
-		else:
+			n = Nodes.objects.filter(lat=lat, lng=lng)
+
 			d = {}
-			d['label'] = label
+			d['label'] = cd['label']
 			# Update model with kwargs expansion
 			n.update(**d)
 
-		return HttpResponse('node updated')
+			#coords = request.POST.get('coords')	
+			"""
+			lat = coords.split(',')[0]
+			lng = coords.split(',')[1]
+
+			if request.POST.get('label') == "":
+				label = None
+			else:
+				label = request.POST.get('label')
+
+			n = Nodes.objects.filter(lat=lat, lng=lng)
+
+			if not n:
+				n = Nodes(
+					lat = lat,
+					lng = lng,
+					label = request.POST.get('label')
+				)
+				n.save()
+				return HttpResponse('node created')
+			else:
+				d = {}
+				d['label'] = label
+				# Update model with kwargs expansion
+				n.update(**d)
+			"""
+			return HttpResponse('node updated')
 
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.delete_nodes'))
@@ -210,7 +225,7 @@ def create_node(request):
 		)
 
 		n.save()
-		return HttpResponse('node created', context_instance=RequestContext(request))
+		return HttpResponse('node created')
 
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.add_paths'))

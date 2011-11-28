@@ -7,6 +7,7 @@ from wayfinder.builder.models import Paths
 import random
 
 class SimplePageTests(TestCase):
+	"""Log into application and verify page status code"""
 	fixtures = ['builder.json']
 
 	def setUp(self):
@@ -19,11 +20,26 @@ class SimplePageTests(TestCase):
 		response = self.client.get('/builder/')	
 		self.assertEqual(response.status_code, 200)
 	
+	def test_destlist(self):
+		response = self.client.get('/destlist/')
+		self.assertEqual(response.status_code, 200)
+
 	def test_logout(self):
 		response = self.client.get('/accounts/logout')
 		self.assertEqual(response.status_code, 301)
 
 class TestPathFinding(TestCase):
+	"""Test path finding implementation
+
+	map_bounds -- boundary of MU campus
+	campus_coords -- coordinates of the center of campus
+
+	Query the closest destinations from the starting position (radius 2 miles) and store the results.
+	Then increment the map_bounds southwest coordinates until they are less than or equal to the northeest
+	coords. For each iteration, a findpath query is performed, the time_to_find value is evaluated, ensuring
+	that the findpath view returns a path in less than 5 seconds.
+
+	"""
 	fixtures = ['builder.json']
 
 	def setUp(self):
@@ -43,10 +59,11 @@ class TestPathFinding(TestCase):
 			dest = destinations[random_index]['label']
 			response = self.client.post('/findpath/', {'start': '{0},{1}'.format(sw_lat,sw_lng), 'end': dest})
 			path = json.loads(response.content)
-			print "Destination:{0} Distance:{1} TimeToFind:{2}".format(dest,path['distance'],path['time_to_find'])
-			self.assertLessEqual(path['time_to_find'], 2.0)
+			#print "Destination: {0} Distance: {1} RunTime: {2}".format(dest,path['distance'],path['time_to_find'])
+			self.assertLessEqual(path['time_to_find'], 5.0)
 
 class TestNodes(TestCase):
+	"""Test CRUD functionality with Nodes model"""
 	fixtures = ['builder.json']
 
 	def setUp(self):
@@ -77,6 +94,7 @@ class TestNodes(TestCase):
 		self.assertFalse(node)	
 
 class TestPaths(TestCase):
+	"""Test CRUD functionality with Paths model"""
 	fixtures = ['builder.json']
 
 	def setUp(self):

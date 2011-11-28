@@ -122,11 +122,13 @@ var WayFinder = function() {
 
 				500: function() {
 					$.jGrowl("Destination already exists");
+					marker.labelContent = "";
 				}
 			},
 			success: function(result) {
 				marker.setMap(map);
 				$.jGrowl("Destination " + node.label + " saved");
+				$("#editnode-dialog").dialog("close");
 				destList();
 			}
 		});
@@ -236,6 +238,7 @@ var WayFinder = function() {
 
 		// Add marker label
 		google.maps.event.addListener(marker, "rightclick", function() {
+			/*
 			var label = prompt("Enter a location name");
 			if (label === "") {
 				marker.labelContent = "";
@@ -243,6 +246,32 @@ var WayFinder = function() {
 				marker.labelContent = label;
 			}
 			updateNode(marker);
+			*/
+			$("#editnode-dialog").dialog({
+				modal: true,
+				height: 200,
+				width: 250,
+				open: function() {
+					$("#label").focus();
+					$(this).find("input").keypress(function(event) {
+						if (event.which == 13) {
+							event.preventDefault();
+							//$("#editnode-dialog").dialog("option").buttons.save();
+						}
+					});
+				},
+
+				buttons: {
+					close: function() {
+						$(this).dialog("close");
+					},
+
+					save: function() {
+						marker.labelContent = $("#label").val();
+						updateNode(marker);
+					} 
+				}
+			});
 		});
 
 		// Add to node to path
@@ -298,6 +327,14 @@ var WayFinder = function() {
 
 					//Initialize markerclusterer
 					var mc = new MarkerClusterer(map, markers, mcOptions);
+
+					$("#toolbar-markers").click(function() {
+						if ($("#toolbar-markers").is(":checked")) {
+							mc.clearMarkers();	
+						} else {
+							mc = new MarkerClusterer(map, markers, mcOptions);
+						}
+					});
 
 				} else {
 					$.jGrowl("No saved nodes, click on the map to being editing!");
@@ -491,6 +528,7 @@ var WayFinder = function() {
 					var lng = $(this).find("li:nth-child(3)").text();
 					var latlng = new google.maps.LatLng(lat, lng);
 					map.panTo(latlng);
+					map.setZoom(20);
 				})
 				.mouseover(function() {
 					$(this).addClass("ui-state-active")
@@ -508,8 +546,31 @@ var WayFinder = function() {
 	 * Delete map paths and nodes, removes saved mapcenter and mapzoom values
 	 */
 	function clearMap() {
+		$("#clearmap-dialog").dialog({
+			modal: true,
+			width: 400,
+			resizable: false,	
+			buttons: {
+				Cancel: function() {
+					$(this).dialog("close");
+				}, 
+				Delete: function() {
+					$.ajax({
+						type: "POST",
+						url: "/clearmap/",
+						success: function(result) {
+							localStorage.removeItem('mapCenter');
+							localStorage.removeItem('mapZoom');
+							window.location = "/builder";
+						}
+					});
+					$(this).dialog("close");
+				}
+			}
+		});
+		/*
 		var clearOk = confirm("Are you sure?");
-
+		
 		if (clearOk) {
 			$.ajax({
 				type: "POST",
@@ -521,6 +582,7 @@ var WayFinder = function() {
 				}
 			});
 		}
+		*/
 	}
 
 	(function toolbar() {
@@ -672,7 +734,8 @@ var WayFinder = function() {
 			startPoint.push(marker);
 			$("#start").val(marker.getPosition().toUrlValue());
 		} else {
-			$("#start").val(startPoint[0].getPosition().toUrlValue());
+			//$("#start").val(startPoint[0].getPosition().toUrlValue());
+			map.panTo(startPoint[0].getPosition());
 		}
 
 		google.maps.event.addListener(startPoint[0], "dragend", function(event) {

@@ -32,12 +32,11 @@ body {
 #welcome {
 	font-size: 11px;
 	padding-left: 2px;
-	color: #FF9900;
-	/*
-	position: relative;
-	left: 125px;
-	top: -15px;
-	*/
+	position: absolute;
+	top: 5px;
+	right: 25px;
+	color: #2e2e2e;
+	text-shadow: 0px 1px 1px #ffffff;
 	margin: 5px 0 0 10px;
 }
 
@@ -291,6 +290,14 @@ th {
 /* jQuery UI Overrides */
 .ui-button-text {
 	font-size: 12px !important;
+}
+
+#editnode-dialog {
+	display:none;
+}
+
+#clearmap-dialog {
+	display:none;
 }
 
 div.jGrowl-notification {
