@@ -10,6 +10,7 @@ from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY, load_backend
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import AnonymousUser
 from django.core import serializers
+from django.utils.html import strip_tags
 from wayfinder.builder.models import Nodes, Paths
 from wayfinder.builder.forms import FindPath, UpdateNode
 from numpy import sin, cos, sqrt, radians, arctan2, ceil
@@ -139,41 +140,17 @@ def update_node(request):
 			coords = request.POST.get('coords')	
 			lat = coords.split(',')[0]
 			lng = coords.split(',')[1]
-
+			
+			# Locate the node that we're going to label
 			n = Nodes.objects.filter(lat=lat, lng=lng)
 
 			d = {}
-			d['label'] = cd['label']
+			d['label'] = strip_tags(cd['label'])
 			# Update model with kwargs expansion
 			n.update(**d)
-
-			#coords = request.POST.get('coords')	
-			"""
-			lat = coords.split(',')[0]
-			lng = coords.split(',')[1]
-
-			if request.POST.get('label') == "":
-				label = None
-			else:
-				label = request.POST.get('label')
-
-			n = Nodes.objects.filter(lat=lat, lng=lng)
-
-			if not n:
-				n = Nodes(
-					lat = lat,
-					lng = lng,
-					label = request.POST.get('label')
-				)
-				n.save()
-				return HttpResponse('node created')
-			else:
-				d = {}
-				d['label'] = label
-				# Update model with kwargs expansion
-				n.update(**d)
-			"""
-			return HttpResponse('node updated')
+			return HttpResponse(json.dumps({'success': d['label']}))
+		else: 
+			return HttpResponse(json.dumps({'errors': form.errors}))
 
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.delete_nodes'))

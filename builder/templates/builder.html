@@ -46,7 +46,7 @@
 					<span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
 					All markers and paths will be permanently deleted and cannot be recovered. Are you sure?
 				</p>
-			</div>
+			</div> <!-- clear map modal dialog -->
 
 			<div id="editnode-dialog" title="Create destination">
 				<form action="" id="editnode-form" method="post">
@@ -56,6 +56,11 @@
 					</div>
 				</form>
 			</div> <!-- edit node modal dialog -->
+
+			<!-- error template -->
+			<script id="error-template" type="text/x-jquery-tmpl">
+				<p class="error">${message}</p>
+			</script>
 
 			<!-- start jquery template -->
 			<div id="toolbar-pathstatslist"></div>

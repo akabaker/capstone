@@ -77,6 +77,9 @@ var WayFinder = function() {
 			success: function(result) {
 				$.jGrowl("Node deleted at " + node.coords);
 				marker.setMap(null);
+				//remove deleted marker and refresh marker clusterer
+				window.wayfinderMc.removeMarker(marker);
+				window.wayfinderMc.redraw();
 				destList();
 			}
 		});
@@ -108,8 +111,8 @@ var WayFinder = function() {
 	 * updateNode
 	 * Update node label
 	 */
-	function updateNode(marker) {
-		var node = prepNode(marker);
+	function updateNode(marker, label) {
+		var node = prepNode(marker, label);
 
 		$.ajax({
 			type: "POST",
@@ -122,14 +125,47 @@ var WayFinder = function() {
 
 				500: function() {
 					$.jGrowl("Destination already exists");
-					marker.labelContent = "";
+					//marker.labelContent = "";
 				}
 			},
 			success: function(result) {
-				marker.setMap(map);
-				$.jGrowl("Destination " + node.label + " saved");
-				$("#editnode-dialog").dialog("close");
-				destList();
+				var results = JSON.parse(result);
+
+				if (results.success) {
+					$.jGrowl("Destination " + results.success + " saved");
+					$("#editnode-dialog").dialog("close");
+					marker.labelContent = results.success;
+					marker.setMap(map);
+					destList();
+				} else {
+					var form = $("#editnode-form");
+					// Attach our error ul to the form
+					var fields = form.find("input");
+					for (var i = 0; i < fields.length; i++) {
+						// If our form error list contains the same property (input name)
+						// as the input list we found above, we need to attach an error notification
+						// to that field
+						if (results.errors.hasOwnProperty(fields[i].name)) {
+							var name = fields[i].name;
+							var tmplData = {
+								message: results.errors[name]
+							}
+
+							// Find the input field that matches the current name
+							var input = form.find("input[name="+name+"]");	
+							var errorItem = "<div class='error-item'></div>";
+						
+							// If the current input has an error list after it, continue to the next item
+							// else, add the errorItem div into the DOM and insert the error template
+							if ($(".error-item").length) {
+								continue;
+							} else {
+								$(input).after(errorItem);
+								$(input).next().html($("#error-template").tmpl(tmplData));
+							}
+						}
+					}
+				}
 			}
 		});
 	}
@@ -138,9 +174,10 @@ var WayFinder = function() {
 	 * prepNode
 	 * Return object containing relevant node values
 	 */
-	function prepNode(marker) {
+	function prepNode(marker, label) {
 		//var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : "";
-		var label = marker.labelContent;
+		//var label = marker.labelContent;
+		var label = label || marker.labelContent;
 		var coords = marker.getPosition().toUrlValue(6);
 		
 		node = {
@@ -238,38 +275,30 @@ var WayFinder = function() {
 
 		// Add marker label
 		google.maps.event.addListener(marker, "rightclick", function() {
-			/*
-			var label = prompt("Enter a location name");
-			if (label === "") {
-				marker.labelContent = "";
-			} else {
-				marker.labelContent = label;
-			}
-			updateNode(marker);
-			*/
 			$("#editnode-dialog").dialog({
 				modal: true,
-				height: 200,
+				height: 195,
+				resizable: false,
 				width: 250,
 				open: function() {
 					$("#label").focus();
-					$(this).find("input").keypress(function(event) {
-						if (event.which == 13) {
-							event.preventDefault();
-							//$("#editnode-dialog").dialog("option").buttons.save();
-						}
+					$("#editnode-form").submit(function(event) {
+						//prevent form submission
+						event.preventDefault();
 					});
 				},
 
 				buttons: {
-					close: function() {
-						$(this).dialog("close");
-					},
-
 					save: function() {
-						marker.labelContent = $("#label").val();
-						updateNode(marker);
-					} 
+						var label = $("#label").val();
+						updateNode(marker, label);
+						$("#editnode-form").find("input").val("");
+					}, 
+					close: function() {
+						//remove error messages from the DOM
+						$(".error-item").detach();
+						$(this).dialog("close");
+					}
 				}
 			});
 		});
@@ -326,13 +355,14 @@ var WayFinder = function() {
 					}
 
 					//Initialize markerclusterer
-					var mc = new MarkerClusterer(map, markers, mcOptions);
+					//var mc = new MarkerClusterer(map, markers, mcOptions);
+					window.wayfinderMc = new MarkerClusterer(map, markers, mcOptions);
 
 					$("#toolbar-markers").click(function() {
 						if ($("#toolbar-markers").is(":checked")) {
-							mc.clearMarkers();	
+							window.wayfinderMc.clearMarkers();	
 						} else {
-							mc = new MarkerClusterer(map, markers, mcOptions);
+							window.wayfinderMc = new MarkerClusterer(map, markers, mcOptions);
 						}
 					});
 
@@ -548,7 +578,7 @@ var WayFinder = function() {
 	function clearMap() {
 		$("#clearmap-dialog").dialog({
 			modal: true,
-			width: 400,
+			width: 500,
 			resizable: false,	
 			buttons: {
 				Cancel: function() {
@@ -568,21 +598,6 @@ var WayFinder = function() {
 				}
 			}
 		});
-		/*
-		var clearOk = confirm("Are you sure?");
-		
-		if (clearOk) {
-			$.ajax({
-				type: "POST",
-				url: "/clearmap/",
-				success: function(result) {
-					localStorage.removeItem('mapCenter');
-					localStorage.removeItem('mapZoom');
-					window.location = "/builder";
-				}
-			});
-		}
-		*/
 	}
 
 	(function toolbar() {
@@ -613,7 +628,6 @@ var WayFinder = function() {
 		});
 
 		$("#toolbar-run").button();
-		//$("#toolbar-run").button().click(function() {
 		$("#toolbar-findpath").submit(function(event) {
 			var data = $("#toolbar-findpath").serialize();
 			
@@ -642,7 +656,6 @@ var WayFinder = function() {
 					for (var i = 0; i < resultLength; i++) {
 						var latlng = new google.maps.LatLng(result.returned_path[i][0], result.returned_path[i][1]);
 						path.push(latlng);
-						console.log(result.returned_path[i][0], result.returned_path[i][1]);
 					}
 
 					testPolylineOptions.path = path;
