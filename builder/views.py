@@ -127,7 +127,6 @@ def load_nodes(request):
 	jsondata = serializers.serialize('json', Nodes.objects.all(), fields=('lat','lng','label'))
 	return HttpResponse(json.dumps(jsondata), mimetype='application/json')
 
-@csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.add_nodes'))
 def update_node(request):
 	"""Update label property for node (a labeled node is considered a destination)"""
@@ -148,9 +147,9 @@ def update_node(request):
 			d['label'] = strip_tags(cd['label'])
 			# Update model with kwargs expansion
 			n.update(**d)
-			return HttpResponse(json.dumps({'success': d['label']}))
+			return HttpResponse(json.dumps({'success': d['label']}), mimetype='application/json')
 		else: 
-			return HttpResponse(json.dumps({'errors': form.errors}))
+			return HttpResponse(json.dumps({'errors': form.errors}), mimetype='application/json')
 
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.delete_nodes'))
@@ -257,7 +256,7 @@ def find_path(request):
 
 	"""
 
-	AVG_WALKING_SPEED = 3.4
+	AVG_WALKING_SPEED = 3.4 #miles per hour
 
 	if request.method == 'POST':
 		form = FindPath(request.POST)
@@ -270,7 +269,10 @@ def find_path(request):
 				'lng': cd['start'].split(',')[1]
 			}
 
-			end_node = Nodes.objects.get(label=cd['end'])
+			try: 
+				end_node = Nodes.objects.get(label=cd['end'])
+			except DoesNotExist:
+				return HttpResponse(json.dumps({'error': 'Unable to find destination'}, mimetype='application/json'))
 	
 			start = [float(start_node['lat']), float(start_node['lng'])]
 			end = [end_node.lat, end_node.lng]

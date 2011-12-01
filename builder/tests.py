@@ -51,7 +51,7 @@ class TestPathFinding(TestCase):
 		sw_lng = self.map_bounds['sw'][1]
 		destinations = json.loads(self.client.get('/nearby/', {'lat': self.campus_coords[0], 'lng': self.campus_coords[1]}).content)
 		destinations_len = len(destinations)
-		
+		print "Testing path finding \n"	
 		while sw_lat <= self.map_bounds['ne'][0] and sw_lng < self.map_bounds['ne'][1]:
 			sw_lat += .00005
 			sw_lng += .00005
@@ -59,7 +59,7 @@ class TestPathFinding(TestCase):
 			dest = destinations[random_index]['label']
 			response = self.client.post('/findpath/', {'start': '{0},{1}'.format(sw_lat,sw_lng), 'end': dest})
 			path = json.loads(response.content)
-			#print "Destination: {0} Distance: {1} RunTime: {2}".format(dest,path['distance'],path['time_to_find'])
+			print "Destination: {0} Distance: {1} RunTime: {2}".format(dest,path['distance'],path['time_to_find'])
 			self.assertLessEqual(path['time_to_find'], 5.0)
 
 class TestNodes(TestCase):

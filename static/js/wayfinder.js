@@ -9,6 +9,7 @@ var WayFinder = function() {
 	var pair = new google.maps.MVCArray;
 	var startPoint = [];
 	var testPaths = [];
+	var wikiURL = "http://code.google.com/p/wayfinder/w/list";
 	var polyLineOptions = {
 		strokeColor: "#FF0000",
 		strokeOpacity: 1.0,
@@ -129,12 +130,12 @@ var WayFinder = function() {
 				}
 			},
 			success: function(result) {
-				var results = JSON.parse(result);
+				//var results = JSON.parse(result);
 
-				if (results.success) {
-					$.jGrowl("Destination " + results.success + " saved");
+				if (result.success) {
+					$.jGrowl("Destination " + result.success + " saved");
 					$("#editnode-dialog").dialog("close");
-					marker.labelContent = results.success;
+					marker.labelContent = result.success;
 					marker.setMap(map);
 					destList();
 				} else {
@@ -145,10 +146,10 @@ var WayFinder = function() {
 						// If our form error list contains the same property (input name)
 						// as the input list we found above, we need to attach an error notification
 						// to that field
-						if (results.errors.hasOwnProperty(fields[i].name)) {
+						if (result.errors.hasOwnProperty(fields[i].name)) {
 							var name = fields[i].name;
 							var tmplData = {
-								message: results.errors[name]
+								message: result.errors[name]
 							}
 
 							// Find the input field that matches the current name
@@ -277,7 +278,7 @@ var WayFinder = function() {
 		google.maps.event.addListener(marker, "rightclick", function() {
 			$("#editnode-dialog").dialog({
 				modal: true,
-				height: 195,
+				height: 200,
 				resizable: false,
 				width: 250,
 				open: function() {
@@ -325,7 +326,7 @@ var WayFinder = function() {
 	 * Query database and return all nodes. Uses the markerclusterer object to manage markers.
 	 */
 	function loadNodes() {
-		var mcOptions = {gridSize: 75, maxZoom: 20};
+		var mcOptions = {gridSize: 75, maxZoom: 19};
 
 		$.ajax({
 			type: "GET",
@@ -612,9 +613,7 @@ var WayFinder = function() {
 			window.location = "/accounts/logout/";
 		});
 
-		$("#toolbar-register").button().click(function() {
-			$("#register-dialog").load("/register/").dialog("open");
-		});
+		$("#toolbar-wiki").button();
 
 		$("#toolbar-admin").button().click(function() {
 			window.location = "/admin";

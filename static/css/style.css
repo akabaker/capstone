@@ -24,7 +24,8 @@ body {
 	/*width: 200px;*/
 	line-height: 125%;
 	text-align: left;
-	background-image: url('/static/images/surveying-2.png');
+	/*background-image: url('/static/images/surveying-2.png');*/
+	background-image: url('/static/images/regroup.png');
 	background-repeat: no-repeat;
 	background-position: 70% 50%;
 }
