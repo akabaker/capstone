@@ -147,9 +147,9 @@ def update_node(request):
 			d['label'] = strip_tags(cd['label'])
 			# Update model with kwargs expansion
 			n.update(**d)
-			return HttpResponse(json.dumps({'success': d['label']}), mimetype='application/json')
+			return HttpResponse(json.dumps({'success': d['label']}))
 		else: 
-			return HttpResponse(json.dumps({'errors': form.errors}), mimetype='application/json')
+			return HttpResponse(json.dumps({'errors': form.errors}))
 
 @csrf_exempt
 @user_passes_test(lambda u: u.has_perm('builder.delete_nodes'))

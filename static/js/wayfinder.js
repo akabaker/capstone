@@ -130,12 +130,12 @@ var WayFinder = function() {
 				}
 			},
 			success: function(result) {
-				//var results = JSON.parse(result);
+				var results = JSON.parse(result);
 
-				if (result.success) {
-					$.jGrowl("Destination " + result.success + " saved");
+				if (results.success) {
+					$.jGrowl("Destination " + results.success + " saved");
 					$("#editnode-dialog").dialog("close");
-					marker.labelContent = result.success;
+					marker.labelContent = results.success;
 					marker.setMap(map);
 					destList();
 				} else {
@@ -146,10 +146,10 @@ var WayFinder = function() {
 						// If our form error list contains the same property (input name)
 						// as the input list we found above, we need to attach an error notification
 						// to that field
-						if (result.errors.hasOwnProperty(fields[i].name)) {
+						if (results.errors.hasOwnProperty(fields[i].name)) {
 							var name = fields[i].name;
 							var tmplData = {
-								message: result.errors[name]
+								message: results.errors[name]
 							}
 
 							// Find the input field that matches the current name
