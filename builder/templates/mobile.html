@@ -7,8 +7,7 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 	<title>Main Page</title>
 	<script src="https://maps.google.com/maps/api/js?libraries=geometry&sensor=true"></script>
-	<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>-->
-	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 	<script src="http://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js"></script>
 	<!--<link rel="stylesheet" href="http://code.jquery.com/mobile/1.0rc2/jquery.mobile-1.0rc2.min.css"/>-->
 
@@ -30,17 +29,25 @@
 		text-align: center !important;
 		font-size: 0.9em !important;
 	}
+
+	#one h1:first-child {
+		text-align: left;
+		background-image: url('/static/images/regroup-mobile.png');
+		background-repeat: no-repeat;
+		background-position: 85% 43%;
+		font-size: 1.2em;
+	}
     </style>
 </head>
 <body>
 	<div data-role="page" data-theme="a" data-transition="fade" class='firstpage' id="one">
 		<div data-role="header">
-			<h1>Wayfinder</h1>
+			<h1 class="mobile-header">Wayfinder</h1>
 		</div>
 		<div data-role="content">
 			<form action="" id="mobile-findpath" method="post">
 				<ul data-role="listview" data-theme="c" data-inset="true">
-					<li data-role="list-divider">Choose start and destination</li>
+					<li data-role="list-divider" style="text-align:center">Choose start and destination</li>
 					<li data-role="fieldcontain">
 					<div id="position-details" data-role="fieldcontain">
 						<span>Your Position:&nbsp</span><span class="position"></span>

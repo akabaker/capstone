@@ -59,7 +59,7 @@ class TestPathFinding(TestCase):
 			dest = destinations[random_index]['label']
 			response = self.client.post('/findpath/', {'start': '{0},{1}'.format(sw_lat,sw_lng), 'end': dest})
 			path = json.loads(response.content)
-			print "Destination: {0} Distance: {1} RunTime: {2}".format(dest,path['distance'],path['time_to_find'])
+			print "Start: {0},{1} Destination: {2} Distance: {3} RunTime: {4}".format(sw_lat,sw_lng,dest,path['distance'],path['time_to_find'])
 			self.assertLessEqual(path['time_to_find'], 5.0)
 
 class TestNodes(TestCase):

@@ -62,22 +62,28 @@ def user_authenticated(request):
 
 # Must render template with the correct RequestContext for access to user auth data
 def builder(request):
+	"""The index page, returns the view with the proper context_instance to ensure that the 
+	user session is available. 
+
+	"""
 	return render_to_response('builder.html', context_instance=RequestContext(request))
 
 def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            new_user = form.save()
-            return HttpResponseRedirect('/builder/')
-    else:
-        form = UserCreationForm()
-    return render_to_response('registration/register.html', {
-        'form': form,
-    })
+	"""Register view for creating new users, this is a pre-cooked view courtesy of Django documenation"""
+	if request.method == 'POST':
+		form = UserCreationForm(request.POST)
+		if form.is_valid():
+			new_user = form.save()
+			return HttpResponseRedirect('/builder/')
+		else:
+			form = UserCreationForm()
+			return render_to_response('registration/register.html', {
+				'form': form,
+			})
 
 @login_required
 def label_list(request):
+	"""Used by findpath for autocomplete functionality -- allows for search of destinations"""
 	if request.method == 'GET':
 		term = request.GET.get('term')
 		labels = Nodes.objects.filter(label__isnull=False, label__icontains=term).order_by('label')
@@ -88,6 +94,12 @@ def label_list(request):
 		return HttpResponse(json.dumps(label_list), mimetype='application/json')
 
 def closest_nodes(request):
+	"""Returns a list of nodes that are nearby
+
+	Generate a list of known destination nodes, then iterate through the list using the haversine
+	function to determine if distance from starting LOC to destination is less than 2 miles.
+
+	"""
 	if request.method == 'GET':
 		lat = request.GET.get('lat')
 		lng = request.GET.get('lng')
@@ -111,6 +123,7 @@ def closest_nodes(request):
 
 @login_required
 def dest_list(request):
+	"""Return a list of destination objects"""
 	if request.method == 'GET':
 		dest_list = Nodes.objects.filter(label__isnull=False).order_by('label')
 		return render_to_response('destlist.html', {'nodes': dest_list})
@@ -242,7 +255,6 @@ def create_path(request):
 		p.save()
 		return HttpResponse("node1: {0} node2: {1}".format(node1, node2))
 
-@csrf_exempt
 def find_path(request):
 	"""Take user starting position, destination and calculate shortest path
 
@@ -272,7 +284,7 @@ def find_path(request):
 			try: 
 				end_node = Nodes.objects.get(label=cd['end'])
 			except DoesNotExist:
-				return HttpResponse(json.dumps({'error': 'Unable to find destination'}, mimetype='application/json'))
+				return HttpResponse(json.dumps({'errors': 'Unable to find destination'}, mimetype='application/json'))
 	
 			start = [float(start_node['lat']), float(start_node['lng'])]
 			end = [end_node.lat, end_node.lng]
@@ -280,8 +292,8 @@ def find_path(request):
 				start_time = time.time()
 				#This function call returns the polyline to be drawn
 				path = Pathfind.pathFind(start, end)
-			except RuntimeError:
-				return Http404('Unable to find path')
+			except Exception, ValueError:
+				return HttpResponse(json.dumps({'errors': 'Unable to validate start point'}, mimetype='application/json'))
 			else:
 				returnedPath = []
 				path_data = {}
@@ -311,4 +323,4 @@ def find_path(request):
 				path_data['walking_time'] = round((path_data['distance'] / AVG_WALKING_SPEED) * 60, 2)
 				return HttpResponse(json.dumps(path_data), mimetype='application/json')
 		else:
-			return HttpResponse('invalid')
+			return HttpResponse(json.dumps({'errors': 'Please fill out all form fields'}, mimetype='application/json'))

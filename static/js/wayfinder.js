@@ -643,45 +643,49 @@ var WayFinder = function() {
 						alert(result);
 					},
 					500: function() {
-						alert('Server returned HTTP 500, use Firebug or Chrome JavaScript console for more info.');
+						alert('Unable to find starting point');
 						$("#toolbar-loading").ajaxStop(function() {
 							$(this).hide();
 						});
 					}
 				},
 				success: function(result) {
-					var path = [];
-					var resultLength = result.returned_path.length;
-					for (var i = 0; i < resultLength; i++) {
-						var latlng = new google.maps.LatLng(result.returned_path[i][0], result.returned_path[i][1]);
-						path.push(latlng);
-					}
-
-					testPolylineOptions.path = path;
-					var testPath = new google.maps.Polyline(testPolylineOptions);
-
-					if (previousPath) {
-						previousPath.setMap(null);
-						previousPath = testPath;
+					if (result.errors) {
+						alert(result.errors);
 					} else {
-						previousPath = testPath;
+						var path = [];
+						var resultLength = result.returned_path.length;
+						for (var i = 0; i < resultLength; i++) {
+							var latlng = new google.maps.LatLng(result.returned_path[i][0], result.returned_path[i][1]);
+							path.push(latlng);
+						}
+
+						testPolylineOptions.path = path;
+						var testPath = new google.maps.Polyline(testPolylineOptions);
+
+						if (previousPath) {
+							previousPath.setMap(null);
+							previousPath = testPath;
+						} else {
+							previousPath = testPath;
+						}
+
+						testPath.setMap(map);
+						
+						var pathStats = {
+							timeToFind: result.time_to_find,
+							distance: result.distance,
+							nodesCount: resultLength - 1,
+							walkingTime: result.walking_time
+						};
+
+						$("#toolbar-pathstatslist").html($("#toolbar-pathstats").tmpl(pathStats));
+						$("#toolbar-pathstatslist").effect("highlight", {}, 3000);
+
+						$("#toolbar-loading").ajaxStop(function() {
+							$(this).hide();
+						});
 					}
-
-					testPath.setMap(map);
-					
-					var pathStats = {
-						timeToFind: result.time_to_find,
-						distance: result.distance,
-						nodesCount: resultLength - 1,
-						walkingTime: result.walking_time
-					};
-
-					$("#toolbar-pathstatslist").html($("#toolbar-pathstats").tmpl(pathStats));
-					$("#toolbar-pathstatslist").effect("highlight", {}, 3000);
-
-					$("#toolbar-loading").ajaxStop(function() {
-						$(this).hide();
-					});
 				}
 			});
 			return false;

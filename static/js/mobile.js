@@ -69,7 +69,7 @@ var WayFinderMobile = function() {
 				},
 				500: function() {
 					$.mobile.hidePageLoadingMsg();
-					alert('Server returned HTTP 500, use Firebug or Chrome JavaScript console for more info.');
+					alert('Unable to find starting point');
 				}
 			},
 			success: function(result) {
@@ -193,7 +193,7 @@ var WayFinderMobile = function() {
 						$.mobile.hidePageLoadingMsg();
 					},
 					500: function() {
-						alert('Server returned HTTP 500, use Firebug or Chrome JavaScript console for more info.');
+						alert('Unable to find destinations.');
 						$.mobile.hidePageLoadingMsg();
 					}
 				},
