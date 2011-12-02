@@ -244,7 +244,7 @@ var WayFinderMobile = function() {
 			)
 	
 			//Distance is in miles - if distance is equal to or less than 25ft alert the user
-			if (distance <= 0.00473484848) {
+			if (distance <= 0.00946969697) {
 				$("#mobile-track-stop").trigger("click");
 				alert("Destination reached");
 			}
