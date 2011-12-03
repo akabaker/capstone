@@ -42,7 +42,7 @@ var WayFinderMobile = function() {
 
 	/**
 	 * route
-	 * @param String start Lat and lng of the starting position.
+	 * @param {string} start Lat and lng of the starting position.
 	 * Performs ajax call to findpath.
 	 */
 	function route(start) {
@@ -121,7 +121,7 @@ var WayFinderMobile = function() {
 
 	/**
 	 * haversine
-	 * @param {Number} points: Lat/lng values
+	 * @param {number} points: Lat/lng values
 	 */
 	function haversine(lon1, lat1, lon2, lat2) {
 		var R = 3961; // miles
@@ -140,9 +140,8 @@ var WayFinderMobile = function() {
 	return {
 		/**
 		 * initialize
-		 * @param {Object} position: Navigator geolocation object
-		 * @param {Boolean} geo: Flag for hardware support of geolocation
 		 * Create the map
+		 * @param {object} position: Navigator geolocation object
 		 */
 		initialize: function(position) {
 			var latlng = new google.maps.LatLng(
@@ -174,7 +173,11 @@ var WayFinderMobile = function() {
 				route(start);
 			}
 		},
-
+		
+		/**
+		 * getDestinations
+		 * @param {object} position Position object/user's current location
+		 */
 		getDestinations: function(position) {
 			origin = {
 				lat: position.coords.latitude,
@@ -233,7 +236,7 @@ var WayFinderMobile = function() {
 
 		/**
 		 * updatePosition
-		 * @param Object position Geolocation object
+		 * @param {object} position Geolocation object
 		 */
 		updatePosition: function(position) {
 			var distance = haversine(
@@ -277,7 +280,7 @@ var WayFinderMobile = function() {
 
 		/**
 		 * handleError
-		 * @param Object error Geolocation error message
+		 * @param {object} error Geolocation error message
 		 */
 		handleError: function(error) {
 			switch (error.code) {

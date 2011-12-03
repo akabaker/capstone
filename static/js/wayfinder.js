@@ -37,7 +37,7 @@ var WayFinder = function() {
 
 	/**
 	 * geoCode
-	 * @param String latlng Reverse geocode based on latlng
+	 * @param {string} address latlng Reverse geocode based on latlng
 	 */
 	function geoCode(address) {
 		var geocoder = new google.maps.Geocoder();
@@ -62,6 +62,7 @@ var WayFinder = function() {
 	/**
 	 * deleteNode
 	 * Delete node from database
+	 * @param {object} marker Marker object
 	 */
 	function deleteNode(marker) {
 		node = prepNode(marker);
@@ -89,6 +90,7 @@ var WayFinder = function() {
 	/**
 	 * createNode
 	 * Save node object to database
+	 * @param {object} marker Marker object
 	 */
 	function createNode(marker) {
 		node = prepNode(marker);
@@ -111,6 +113,8 @@ var WayFinder = function() {
 	/**
 	 * updateNode
 	 * Update node label
+	 * @param {object} marker Marker object
+	 * @param {string} label Destination label
 	 */
 	function updateNode(marker, label) {
 		var node = prepNode(marker, label);
@@ -174,6 +178,8 @@ var WayFinder = function() {
 	/**
 	 * prepNode
 	 * Return object containing relevant node values
+	 * @param {object} marker Marker object
+	 * @param {string} label Destination label
 	 */
 	function prepNode(marker, label) {
 		//var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : "";
@@ -221,8 +227,8 @@ var WayFinder = function() {
 
 	/**
 	 * addPathToPaths
-	 * @param Object path Object containing path
 	 * Add path to paths array.
+	 * @param {object} path Object containing path
 	 */
 	function addPathToPaths(path) {
 		paths.push(path);
@@ -231,6 +237,7 @@ var WayFinder = function() {
 	/**
 	 * createPath
 	 * Save path to database
+	 * @param {object} path Object containing path
 	 */
 	function createPath(path) {
 		var edge = prepPath(path);
@@ -248,7 +255,8 @@ var WayFinder = function() {
 	/**
 	 * prepPath
 	 * Create object to stringfy and save to database
-	 * @return object containing node1 and node2 lat/lng
+	 * @param {object} path Path object
+	 * @return {object} containing node1 and node2 lat/lng
 	 */
 	function prepPath(path) {
 		var mapPath = path.getPath();
@@ -264,6 +272,7 @@ var WayFinder = function() {
 
 	/**
 	 * addMarkerListeners
+	 * @param {object} marker Marker object
 	 */
 	function addMarkerListeners(marker, toggle) {
 		if (!toggle) {
@@ -388,6 +397,8 @@ var WayFinder = function() {
 	/**
 	 * startPath
 	 * Create two node polyline
+	 * @param {object} marker Marker object
+	 * @param {boolean} isLoadedMarker Check if marker has been loaded
 	 */
 	function startPath(marker, isLoadedMarker) {
 		// Add listeners
@@ -435,6 +446,8 @@ var WayFinder = function() {
 	/**
 	 * isPathEqual
 	 * For each path in paths, check to see if the current path (the one being placed) is already in paths
+	 * @param {object} path Marker object
+	 * @return {boolean} boolean return value
 	 */
 	function isPathEqual(path) {
 		var returnCode = false
