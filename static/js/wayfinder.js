@@ -182,8 +182,6 @@ var WayFinder = function() {
 	 * @param {string} label Destination label
 	 */
 	function prepNode(marker, label) {
-		//var label = typeof(marker.labelContent) != 'undefined' ? marker.labelContent : "";
-		//var label = marker.labelContent;
 		var label = label || marker.labelContent;
 		var coords = marker.getPosition().toUrlValue(6);
 		
@@ -365,7 +363,6 @@ var WayFinder = function() {
 					}
 
 					//Initialize markerclusterer
-					//var mc = new MarkerClusterer(map, markers, mcOptions);
 					window.wayfinderMc = new MarkerClusterer(map, markers, mcOptions);
 
 					$("#toolbar-markers").click(function() {
@@ -465,7 +462,7 @@ var WayFinder = function() {
 
 	/**
 	 * Create modal forms - the login and registration forms are from built-in 
-	 * django views. Executed on pageload
+	 * django views. Executed on page load
 	 */
 	(function modalForms() {
 		/**
@@ -763,7 +760,6 @@ var WayFinder = function() {
 			startPoint.push(marker);
 			$("#start").val(marker.getPosition().toUrlValue());
 		} else {
-			//$("#start").val(startPoint[0].getPosition().toUrlValue());
 			map.panTo(startPoint[0].getPosition());
 		}
 
@@ -813,7 +809,7 @@ var WayFinder = function() {
     	var tooltips = [
     		{
     			elem: $("#toolbar-clear"),
-    			content: "Delete all nodes and paths.",
+    			content: "Delete all nodes and paths. Hide markers and/or paths.",
     			target: $("#toolbar-clear").prev()
 			},
     		{
@@ -824,7 +820,7 @@ var WayFinder = function() {
 			},
     		{
     			elem: $("#toolbar-destlist"),
-    			content: "Destination nodes list. Click a destination to set jump to that location on the map.",
+    			content: "Destination nodes list. Click on a destination to jump to the destination's location on the map.",
     			target: $("#toolbar-destlist").prev()
 			}
     	];

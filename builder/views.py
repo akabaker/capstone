@@ -14,9 +14,9 @@ from django.utils.html import strip_tags
 from wayfinder.builder.models import Nodes, Paths
 from wayfinder.builder.forms import FindPath, UpdateNode
 from numpy import sin, cos, sqrt, radians, arctan2, ceil
-import time
 from math import asin
 from django import forms
+import time
 import urllib
 import Pathfind
 
