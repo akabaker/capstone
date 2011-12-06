@@ -60,7 +60,7 @@ class TestPathFinding(TestCase):
 			response = self.client.post('/findpath/', {'start': '{0},{1}'.format(sw_lat,sw_lng), 'end': dest})
 			path = json.loads(response.content)
 			print "Start: {0},{1} Destination: {2} Distance: {3} RunTime: {4}".format(sw_lat,sw_lng,dest,path['distance'],path['time_to_find'])
-			self.assertLessEqual(path['time_to_find'], 5.0)
+			self.assertLessEqual(path['time_to_find'], 20.0)
 
 class TestNodes(TestCase):
 	"""Test CRUD functionality with Nodes model"""
