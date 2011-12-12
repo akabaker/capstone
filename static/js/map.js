@@ -1,8 +1,6 @@
 /**
  * Map
- *
- * Object for created google maps
- *
+ * Initializes map
  */
 var Map = function() {
 	var geoCodeURL = 'https://maps.googleapis.com/maps/api/geocode/json';
@@ -11,12 +9,9 @@ var Map = function() {
 	var address = 'Columbia, MO';
 	
 	/**
-	* Parses geocode results and calls init to reload the map canvas
-	*
-	* @param Object obj This object is the parsed json data; it is the geocode result
-	* @param Object ref A reference to the Map object
-	*
-	*/
+	 * Parses geocode results and calls init to reload the map canvas
+	 * @param {object} obj This object is the parsed json data; it is the geocode result
+	 */
 	function geoCodeCallback(obj) {
 
 		// Geocode result is a json object
@@ -29,18 +24,12 @@ var Map = function() {
 	}
 
 	/**
-	* Performs a geocode query to google maps api
-	*
-	* @param String address Street address to look up
-	* @param String geoCodeURL Google api geocode url
-	* @param String sensor Enable or disable GPS sensor (for smart phones and devices)
-	*
-	*/
+	 * Performs a geocode query to google maps api
+	 * @param {string} address Street address to look up
+	 * @param {string} geoCodeURL Google api geocode url
+	 * @param {string} sensor Enable or disable GPS sensor (for smart phones and devices)
+	 */
 	function geoCode(address, geoCodeURL, sensor) {
-		//var address = typeof(address) != 'undefined' ? address : self.address;
-		//var geoCodeURL = typeof(geoCodeURL) != 'undefined' ? geoCodeURL : self.geoCodeURL;
-		//var sensor = typeof(sensor) != 'undefined' ? sensor : self.sensor;
-
 		var data = {
 			address: address,
 			geoCodeURL: geoCodeURL,
@@ -66,12 +55,11 @@ var Map = function() {
 	}
 
 	/**
-	* Builds the map, defaults to a location on MU campus
-	*
-	* @param Number lat The latitude of the goecode location
-	* @param Number lng The longitude of the geocode location
-	*
-	*/
+	 * Builds the map, defaults to a location on MU campus
+	 * localStorage is used to load mapZoom and mapCenter values (if they have been set)
+	 * @param {number} lat The latitude of the goecode location
+	 * @param {number} lng The longitude of the geocode location
+	 */
 	function initialize(lat, lng, zoom) {
 		//Default values for MU campus
 		lat = typeof(lat) != 'undefined' ? lat : 38.94617;
@@ -116,9 +104,9 @@ var Map = function() {
 		google.maps.event.addListener(map, "zoom_changed", function() {
 			var mapZoom = map.getZoom();
 			localStorage.mapZoom = JSON.stringify(map.getZoom());
-			//console.log(map.getBounds().toString());
 		});
 
+		//Allow for zoom with the shift key is pressed
 		map.enableKeyDragZoom();
 		return map;
 	}

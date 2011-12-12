@@ -194,10 +194,12 @@ var WayFinderMobile = function() {
 					404: function(result) {
 						alert("Sorry, no destinations could be found!");
 						$.mobile.hidePageLoadingMsg();
+						navigator.geolocation.clearWatch(watch);	
 					},
 					500: function() {
 						alert('Unable to find destinations.');
 						$.mobile.hidePageLoadingMsg();
+						navigator.geolocation.clearWatch(watch);	
 					}
 				},
 				success: function(result) {
@@ -327,6 +329,7 @@ $(".firstpage").live("pageshow", function() {
 		//},500);
 	} else {
 		alert("Your browser does not support geolocation");
+		navigator.geolocation.clearWatch(watch);	
 	}
 });
 
